@@ -1,8 +1,8 @@
-const User = require('../models/users.model');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const UsernameAlreadyExistsError = require('../errors/UsernameAlreadyExistsError');
-const InvalidCredentialsError = require('../errors/InvalidCredentialsError');
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import User from '../models/users.model.js';
+import UsernameAlreadyExistsError from '../errors/UsernameAlreadyExistsError.js';
+import InvalidCredentialsError from '../errors/InvalidCredentialsError.js';
 
 const register = async (username, password, email) => {
   const existing = await User.findOne({ username });
@@ -26,4 +26,4 @@ const login = async (username, password) => {
   return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '12h' });
 };
 
-module.exports = { register, login };
+export { register, login };

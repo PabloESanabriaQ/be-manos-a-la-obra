@@ -1,36 +1,12 @@
-const express = require('express');
+import express from 'express';
+import { getStories, getStoryById, getTasksByStory, createStory, updateStory } from '../controllers/stories.controller.js';
+
 const router = express.Router();
-const { getStoryById, getStories, getTasksByStory, createStory, updateStory } = require('../controllers/stories.controller');
 
+router.get('/', (req, res, next) => getStories(req, res, next));
+router.get('/:_id', (req, res, next) => getStoryById(req, res, next));
+router.get('/:_id/tasks', (req, res, next) => getTasksByStory(req, res, next));
+router.post('/', (req, res, next) => createStory(req, res, next));
+router.put('/:_id', (req, res, next) => updateStory(req, res, next));
 
-router.get('/', 
-	(req, res) => {
-    return getStories(req, res);
-  }
-);
-
-router.get('/:_id', 
-	(req, res, next) => {
-    return getStoryById(req, res, next)
-  }
-);
-
-router.get('/:_id/tasks', 
-	(req, res, next) => {
-    return getTasksByStory(req, res, next);
-  }
-);
-
-router.post('/',
-  (req, res, next) => {
-    return createStory(req, res, next);
-  }
-);
-
-router.put('/:_id',
-  (req, res, next) => {
-    return updateStory(req, res, next);
-  }
-);
-
-module.exports = router;
+export default router;

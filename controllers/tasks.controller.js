@@ -1,4 +1,4 @@
-const tasksService = require('../services/tasks.service');
+import * as tasksService from '../services/tasks.service.js';
 
 const getTasks = async (req, res, next) => {
   try {
@@ -45,4 +45,4 @@ const deleteTask = async (req, res, next) => {
   }
 };
 
-module.exports = { getTasks, getTaskById, createTask, updateTask, deleteTask };
+export { getTasks, getTaskById, createTask, updateTask, deleteTask };

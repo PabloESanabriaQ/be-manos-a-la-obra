@@ -1,22 +1,11 @@
-const express = require('express');
+import express from 'express';
+import { getUsers, getUserById } from '../controllers/users.controller.js';
+import { register } from '../controllers/auth.controller.js';
+
 const router = express.Router();
-const { getUsers, getUserById } = require('../controllers/users.controller');
-const { register } = require('../controllers/auth.controller');
 
-router.get('/', 
-	(req, res) => {
-    return getUsers(req, res);
-  }
-);
+router.get('/', (req, res, next) => getUsers(req, res, next));
+router.get('/:_id', (req, res, next) => getUserById(req, res, next));
+router.post('/', (req, res, next) => register(req, res, next));
 
-router.get('/:_id', 
-	(req, res, next) => {
-    return getUserById(req, res, next);
-  }
-);
-
-router.post('/', (req, res, next) => {
-  return register(req, res, next);
-});
-
-module.exports = router;
+export default router;

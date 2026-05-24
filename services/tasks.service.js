@@ -1,7 +1,7 @@
-const Task = require('../models/tasks.model');
-const { validateCreateTask, validateUpdateTask } = require('../utils/validateTasks');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
+import Task from '../models/tasks.model.js';
+import { validateCreateTask, validateUpdateTask } from '../utils/validateTasks.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import ValidationError from '../errors/ValidationError.js';
 
 const getAll = () => Task.find();
 
@@ -28,4 +28,4 @@ const update = async (id, body) => {
 
 const remove = (id) => Task.findByIdAndDelete(id);
 
-module.exports = { getAll, getById, create, update, remove };
+export { getAll, getById, create, update, remove };

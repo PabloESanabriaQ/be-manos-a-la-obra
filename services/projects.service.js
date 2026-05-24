@@ -1,6 +1,6 @@
-const Project = require('../models/projects.model');
-const Epic = require('../models/epics.model');
-const NotFoundError = require('../errors/NotFoundError');
+import Project from '../models/projects.model.js';
+import Epic from '../models/epics.model.js';
+import NotFoundError from '../errors/NotFoundError.js';
 
 const getAll = () => Project.find();
 
@@ -26,4 +26,4 @@ const update = async (id, body) => {
 
 const remove = (id) => Project.findByIdAndDelete(id);
 
-module.exports = { getAll, getById, getEpicsByProject, create, update, remove };
+export { getAll, getById, getEpicsByProject, create, update, remove };

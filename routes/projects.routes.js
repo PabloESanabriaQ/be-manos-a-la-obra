@@ -1,55 +1,14 @@
-const express = require('express');
+import express from 'express';
+import { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject } from '../controllers/projects.controller.js';
+
 const router = express.Router();
-const { 
-  getProjectById, 
-  getProjects, 
-  getEpicsByProject, 
-  updateProject, 
-  createProject,
-  deleteProject 
-} = require('../controllers/projects.controller');
 
+router.get('/', (req, res, next) => getProjects(req, res, next));
+router.get('/:_id', (req, res, next) => getProjectById(req, res, next));
+router.get('/:_id/epics', (req, res, next) => getEpicsByProject(req, res, next));
+router.post('/', (req, res, next) => createProject(req, res, next));
+router.put('/:_id', (req, res, next) => updateProject(req, res, next));
+router.patch('/:_id', (req, res, next) => updateProject(req, res, next));
+router.delete('/:_id', (req, res, next) => deleteProject(req, res, next));
 
-router.get('/', 
-	(req, res) => {
-    return getProjects(req, res);
-  }
-);
-
-router.get('/:_id', 
-	(req, res, next) => {
-    return getProjectById(req, res, next);
-  }
-);
-
-router.get('/:_id/epics', 
-	(req, res, next) => {
-    return getEpicsByProject(req, res, next);
-  }
-);
-
-router.post('/', 
-  (req, res, next) => {
-    return createProject(req, res, next)
-  }
-)
-
-router.put('/:_id', 
-  (req, res, next) => {
-    return updateProject(req, res, next)
-  }
-);
-
-router.patch('/:_id', 
-  (req, res, next) => {
-    return updateProject(req, res, next)
-  }
-);
-
-router.delete('/:_id', 
-  (req, res, next) => {
-    return deleteProject(req, res, next)
-  }
-);
-
-module.exports = router;
+export default router;

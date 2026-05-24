@@ -1,4 +1,4 @@
-const usersService = require('../services/users.service');
+import * as usersService from '../services/users.service.js';
 
 const getUsers = async (req, res, next) => {
   try {
@@ -27,4 +27,4 @@ const getUserByIdWithoutPwd = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, getUserById, getUserByIdWithoutPwd };
+export { getUsers, getUserById, getUserByIdWithoutPwd };

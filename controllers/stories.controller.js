@@ -1,4 +1,4 @@
-const storiesService = require('../services/stories.service');
+import * as storiesService from '../services/stories.service.js';
 
 const getStories = async (req, res, next) => {
   try {
@@ -45,4 +45,4 @@ const updateStory = async (req, res, next) => {
   }
 };
 
-module.exports = { getStories, getStoryById, getTasksByStory, createStory, updateStory };
+export { getStories, getStoryById, getTasksByStory, createStory, updateStory };

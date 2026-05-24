@@ -1,4 +1,4 @@
-const epicsService = require('../services/epics.service');
+import * as epicsService from '../services/epics.service.js';
 
 const getEpics = async (req, res, next) => {
   try {
@@ -45,4 +45,4 @@ const updateEpic = async (req, res, next) => {
   }
 };
 
-module.exports = { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic };
+export { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic };

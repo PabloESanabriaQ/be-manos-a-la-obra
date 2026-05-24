@@ -1,27 +1,13 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const User = require('./users.model');
+import mongoose from 'mongoose';
+import User from './users.model.js';
 
-const projectSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true
-    },
-    members: [{
-      type: Schema.Types.ObjectId,
-      ref: User,
-      required: true
-    }],
-    description: {
-      type: String,
-      required: false
-    },
-    icon: {
-      type: String,
-      required: false
-    }
-  }
-)
+const { Schema } = mongoose;
 
-module.exports = mongoose.model('project', projectSchema);
+const projectSchema = new Schema({
+  name: { type: String, required: true },
+  members: [{ type: Schema.Types.ObjectId, ref: User, required: true }],
+  description: { type: String, required: false },
+  icon: { type: String, required: false },
+});
+
+export default mongoose.models['project'] || mongoose.model('project', projectSchema);

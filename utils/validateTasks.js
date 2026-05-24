@@ -1,4 +1,4 @@
-const ValidationError = require('../errors/ValidationError');
+import ValidationError from '../errors/ValidationError.js';
 
 const validateCreateTask = (task) => {
   if (!task.name) {
@@ -7,10 +7,10 @@ const validateCreateTask = (task) => {
   if (!task.story) {
     throw new ValidationError('The task must be associated with a story');
   }
-}
+};
 
 const validateUpdateTask = (task) => {
-  if(!task._id) {
+  if (!task._id) {
     throw new ValidationError('Task ID is required');
   }
   if (!task.name) {
@@ -19,9 +19,6 @@ const validateUpdateTask = (task) => {
   if (!task.story) {
     throw new ValidationError('The task must be associated with a story');
   }
-}
-
-module.exports = {
-  validateCreateTask,
-  validateUpdateTask
 };
+
+export { validateCreateTask, validateUpdateTask };

@@ -1,7 +1,7 @@
-const Epic = require('../models/epics.model');
-const Story = require('../models/stories.model');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
+import Epic from '../models/epics.model.js';
+import Story from '../models/stories.model.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import ValidationError from '../errors/ValidationError.js';
 
 const getAll = () => Epic.find();
 
@@ -28,4 +28,4 @@ const update = async (id, body) => {
   return Epic.findByIdAndUpdate(id, body, { new: true });
 };
 
-module.exports = { getAll, getById, getStoriesByEpic, create, update };
+export { getAll, getById, getStoriesByEpic, create, update };

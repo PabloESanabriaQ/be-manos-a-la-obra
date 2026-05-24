@@ -1,4 +1,4 @@
-const projectsService = require('../services/projects.service');
+import * as projectsService from '../services/projects.service.js';
 
 const getProjects = async (req, res, next) => {
   try {
@@ -54,4 +54,4 @@ const deleteProject = async (req, res, next) => {
   }
 };
 
-module.exports = { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject };
+export { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject };

@@ -1,37 +1,15 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-const Story = require('./stories.model');
+import mongoose from 'mongoose';
+import Story from './stories.model.js';
 
-const tasksSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true
-    },
-    description: {
-      type: String,
-      required: false
-    },
-    story: {
-      type: Schema.Types.ObjectId,
-      ref: Story,
-      required: true
-    },
-    created: {
-      type: Date,
-      default: Date.now,
-      required: false
-    },
-    dueDate: {
-      type: Date,
-      required: false
-    },
-    done: {
-      type: Boolean,
-      required: false,
-      default: false
-    }
-  }
-)
+const { Schema } = mongoose;
 
-module.exports = mongoose.model('task', tasksSchema);
+const tasksSchema = new Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: false },
+  story: { type: Schema.Types.ObjectId, ref: Story, required: true },
+  created: { type: Date, default: Date.now, required: false },
+  dueDate: { type: Date, required: false },
+  done: { type: Boolean, required: false, default: false },
+});
+
+export default mongoose.models['task'] || mongoose.model('task', tasksSchema);

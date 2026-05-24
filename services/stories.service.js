@@ -1,7 +1,7 @@
-const Story = require('../models/stories.model');
-const Task = require('../models/tasks.model');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
+import Story from '../models/stories.model.js';
+import Task from '../models/tasks.model.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import ValidationError from '../errors/ValidationError.js';
 
 const getAll = () => Story.find();
 
@@ -28,4 +28,4 @@ const update = async (id, body) => {
   return Story.findByIdAndUpdate(id, body, { new: true });
 };
 
-module.exports = { getAll, getById, getTasksByStory, create, update };
+export { getAll, getById, getTasksByStory, create, update };

@@ -1,5 +1,5 @@
-const User = require('../models/users.model');
-const NotFoundError = require('../errors/NotFoundError');
+import User from '../models/users.model.js';
+import NotFoundError from '../errors/NotFoundError.js';
 
 const getAll = () => User.find().select('-password');
 
@@ -11,4 +11,4 @@ const getById = async (id) => {
 
 const getByIdWithoutPwd = (id) => User.findById(id).select('-password');
 
-module.exports = { getAll, getById, getByIdWithoutPwd };
+export { getAll, getById, getByIdWithoutPwd };
