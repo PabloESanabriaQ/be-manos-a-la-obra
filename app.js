@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import swaggerSpec from './config/swagger.js';
 import mongoDbConnection from './db/mongoDbConnection.js';
 import errorHandler from './middlewares/errorHandler.js';
 import authMiddleware from './middlewares/authentication.js';
@@ -28,7 +30,30 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.json());
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 app.use('/api/login', loginRouter);
+
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Cerrar sesión
+ *     description: Elimina la cookie de autenticación.
+ *     tags: [Auth]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Logout exitoso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Logout exitoso
+ */
 app.post('/api/logout', logout);
 app.use('/api/epics', authMiddleware, epicsRouter);
 app.use('/api/projects', authMiddleware, projectsRouter);
