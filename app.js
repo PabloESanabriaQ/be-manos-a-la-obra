@@ -18,7 +18,7 @@ import pinoHttp from 'pino-http';
 import mongoDbConnection from './db/mongoDbConnection.js';
 import errorHandler from './middlewares/errorHandler.js';
 import authMiddleware from './middlewares/authentication.js';
-import { logout } from './controllers/auth.controller.js';
+import { logout, refresh } from './controllers/auth.controller.js';
 import loginRouter from './routes/login.routes.js';
 import epicsRouter from './routes/epics.routes.js';
 import projectsRouter from './routes/projects.routes.js';
@@ -67,6 +67,35 @@ app.use('/api/login', loginRouter);
  *                   example: Logout exitoso
  */
 app.post('/api/logout', logout);
+
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Renovar access token
+ *     description: Usa la cookie `refreshToken` para emitir un nuevo access token y rotar el refresh token.
+ *     tags: [Auth]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Token renovado. Actualiza ambas cookies.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Token renovado
+ *       400:
+ *         description: Refresh token inválido o expirado
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+app.post('/api/auth/refresh', refresh);
+
 app.use('/api/epics', authMiddleware, epicsRouter);
 app.use('/api/projects', authMiddleware, projectsRouter);
 app.use('/api/stories', authMiddleware, storiesRouter);

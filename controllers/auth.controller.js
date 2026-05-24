@@ -1,17 +1,21 @@
 import * as authService from '../services/auth.service.js';
 
-const COOKIE_OPTIONS = {
+const BASE_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'strict',
-  maxAge: 12 * 60 * 60 * 1000,
+};
+
+const setAuthCookies = (res, { accessToken, refreshToken }) => {
+  res.cookie('token', accessToken, { ...BASE_COOKIE_OPTIONS, maxAge: 15 * 60 * 1000 });
+  res.cookie('refreshToken', refreshToken, { ...BASE_COOKIE_OPTIONS, maxAge: 7 * 24 * 60 * 60 * 1000 });
 };
 
 const register = async (req, res, next) => {
   try {
     const { username, password, email } = req.body;
-    const token = await authService.register(username, password, email);
-    res.cookie('token', token, COOKIE_OPTIONS);
+    const tokens = await authService.register(username, password, email);
+    setAuthCookies(res, tokens);
     res.status(201).json({ message: 'Usuario creado' });
   } catch (err) {
     next(err);
@@ -21,21 +25,33 @@ const register = async (req, res, next) => {
 const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const token = await authService.login(username, password);
-    res.cookie('token', token, COOKIE_OPTIONS);
+    const tokens = await authService.login(username, password);
+    setAuthCookies(res, tokens);
     res.json({ message: 'Login exitoso' });
   } catch (err) {
     next(err);
   }
 };
 
-const logout = (req, res) => {
-  res.clearCookie('token', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-  });
-  res.json({ message: 'Logout exitoso' });
+const refresh = async (req, res, next) => {
+  try {
+    const tokens = await authService.refresh(req.cookies?.refreshToken);
+    setAuthCookies(res, tokens);
+    res.json({ message: 'Token renovado' });
+  } catch (err) {
+    next(err);
+  }
 };
 
-export { register, login, logout };
+const logout = async (req, res, next) => {
+  try {
+    await authService.logout(req.cookies?.refreshToken);
+    res.clearCookie('token', BASE_COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', BASE_COOKIE_OPTIONS);
+    res.json({ message: 'Logout exitoso' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { register, login, refresh, logout };
