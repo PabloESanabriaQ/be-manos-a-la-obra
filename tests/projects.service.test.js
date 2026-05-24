@@ -13,7 +13,21 @@ vi.mock('../models/projects.model.js', () => {
 vi.mock('../models/epics.model.js', () => {
   const MockEpic = vi.fn(function() { return { save: vi.fn() }; });
   MockEpic.find = vi.fn();
+  MockEpic.updateMany = vi.fn();
   return { default: MockEpic };
+});
+
+vi.mock('../models/stories.model.js', () => {
+  const MockStory = vi.fn(function() { return { save: vi.fn() }; });
+  MockStory.find = vi.fn();
+  MockStory.updateMany = vi.fn();
+  return { default: MockStory };
+});
+
+vi.mock('../models/tasks.model.js', () => {
+  const MockTask = vi.fn(function() { return { save: vi.fn() }; });
+  MockTask.updateMany = vi.fn();
+  return { default: MockTask };
 });
 
 import Project from '../models/projects.model.js';
@@ -60,6 +74,12 @@ describe('ProjectsService', () => {
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
     });
+
+    it('lanza NotFoundError si está eliminado', async () => {
+      Project.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(getById('1')).rejects.toThrow(NotFoundError);
+    });
   });
 
   describe('getEpicsByProject', () => {
@@ -71,7 +91,7 @@ describe('ProjectsService', () => {
 
       const result = await getEpicsByProject('1');
 
-      expect(Epic.find).toHaveBeenCalledWith({ project: '1' });
+      expect(Epic.find).toHaveBeenCalledWith({ project: '1', deletedAt: null });
       expect(result).toEqual(fakeEpics);
     });
 
@@ -102,7 +122,9 @@ describe('ProjectsService', () => {
 
   describe('update', () => {
     it('actualiza y devuelve el proyecto modificado', async () => {
+      const existing = { _id: '1', name: 'Antes' };
       const updated = { _id: '1', name: 'Actualizado' };
+      Project.findById.mockResolvedValue(existing);
       Project.findByIdAndUpdate.mockResolvedValue(updated);
 
       const result = await update('1', { name: 'Actualizado' });
@@ -112,9 +134,15 @@ describe('ProjectsService', () => {
     });
 
     it('lanza NotFoundError si no existe', async () => {
-      Project.findByIdAndUpdate.mockResolvedValue(null);
+      Project.findById.mockResolvedValue(null);
 
       await expect(update('inexistente', { name: 'x' })).rejects.toThrow(NotFoundError);
+    });
+
+    it('lanza NotFoundError si está eliminado', async () => {
+      Project.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(update('1', { name: 'x' })).rejects.toThrow(NotFoundError);
     });
 
     it('lanza ValidationError si falta name', async () => {
@@ -123,12 +151,16 @@ describe('ProjectsService', () => {
   });
 
   describe('remove', () => {
-    it('llama a findByIdAndDelete con el id correcto', async () => {
-      Project.findByIdAndDelete.mockResolvedValue({ _id: '1' });
+    it('hace soft delete del proyecto y en cascada sus hijos', async () => {
+      Project.findByIdAndUpdate.mockResolvedValue({ _id: '1' });
+      Epic.find.mockReturnValue({ select: vi.fn().mockResolvedValue([]) });
 
       await remove('1');
 
-      expect(Project.findByIdAndDelete).toHaveBeenCalledWith('1');
+      expect(Project.findByIdAndUpdate).toHaveBeenCalledWith(
+        '1',
+        expect.objectContaining({ deletedAt: expect.any(Date) }),
+      );
     });
   });
 });

@@ -59,6 +59,12 @@ describe('StoriesService', () => {
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
     });
+
+    it('lanza NotFoundError si está eliminada', async () => {
+      Story.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(getById('1')).rejects.toThrow(NotFoundError);
+    });
   });
 
   describe('getTasksByStory', () => {
@@ -70,7 +76,7 @@ describe('StoriesService', () => {
 
       const result = await getTasksByStory('1');
 
-      expect(Task.find).toHaveBeenCalledWith({ story: '1' });
+      expect(Task.find).toHaveBeenCalledWith({ story: '1', deletedAt: null });
       expect(result).toEqual(fakeTasks);
     });
 
@@ -128,6 +134,12 @@ describe('StoriesService', () => {
       Story.findById.mockResolvedValue(null);
 
       await expect(update('inexistente', { name: 'x' })).rejects.toThrow(NotFoundError);
+    });
+
+    it('lanza NotFoundError si está eliminada', async () => {
+      Story.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(update('1', { name: 'x' })).rejects.toThrow(NotFoundError);
     });
 
     it('lanza ValidationError si falta name', async () => {

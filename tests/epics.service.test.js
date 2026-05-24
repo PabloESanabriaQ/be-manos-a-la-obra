@@ -59,6 +59,12 @@ describe('EpicsService', () => {
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
     });
+
+    it('lanza NotFoundError si está eliminada', async () => {
+      Epic.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(getById('1')).rejects.toThrow(NotFoundError);
+    });
   });
 
   describe('getStoriesByEpic', () => {
@@ -70,7 +76,7 @@ describe('EpicsService', () => {
 
       const result = await getStoriesByEpic('1');
 
-      expect(Story.find).toHaveBeenCalledWith({ epic: '1' });
+      expect(Story.find).toHaveBeenCalledWith({ epic: '1', deletedAt: null });
       expect(result).toEqual(fakeStories);
     });
 
@@ -120,6 +126,12 @@ describe('EpicsService', () => {
       Epic.findById.mockResolvedValue(null);
 
       await expect(update('inexistente', { name: 'x' })).rejects.toThrow(NotFoundError);
+    });
+
+    it('lanza NotFoundError si está eliminada', async () => {
+      Epic.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(update('1', { name: 'x' })).rejects.toThrow(NotFoundError);
     });
 
     it('lanza ValidationError si falta name', async () => {

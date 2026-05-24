@@ -5,7 +5,6 @@ vi.mock('../models/tasks.model.js', () => {
   MockTask.find = vi.fn();
   MockTask.findById = vi.fn();
   MockTask.findByIdAndUpdate = vi.fn();
-  MockTask.findByIdAndDelete = vi.fn();
   MockTask.countDocuments = vi.fn();
   return { default: MockTask };
 });
@@ -52,6 +51,12 @@ describe('TasksService', () => {
       Task.findById.mockResolvedValue(null);
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
+    });
+
+    it('lanza NotFoundError si está eliminado', async () => {
+      Task.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(getById('1')).rejects.toThrow(NotFoundError);
     });
   });
 
@@ -101,6 +106,13 @@ describe('TasksService', () => {
         .rejects.toThrow(NotFoundError);
     });
 
+    it('lanza NotFoundError si está eliminado', async () => {
+      Task.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+
+      await expect(update('1', { _id: '1', name: 'x', story: 's' }))
+        .rejects.toThrow(NotFoundError);
+    });
+
     it('lanza ValidationError si se intenta cambiar la story', async () => {
       const existing = { _id: '1', name: 'Test', story: { toString: () => 'story-original' } };
       Task.findById.mockResolvedValue(existing);
@@ -111,12 +123,12 @@ describe('TasksService', () => {
   });
 
   describe('remove', () => {
-    it('llama a findByIdAndDelete con el id correcto', async () => {
-      Task.findByIdAndDelete.mockResolvedValue({ _id: '1' });
+    it('hace soft delete de la tarea', async () => {
+      Task.findByIdAndUpdate.mockResolvedValue({ _id: '1', deletedAt: new Date() });
 
       await remove('1');
 
-      expect(Task.findByIdAndDelete).toHaveBeenCalledWith('1');
+      expect(Task.findByIdAndUpdate).toHaveBeenCalledWith('1', expect.objectContaining({ deletedAt: expect.any(Date) }));
     });
   });
 });

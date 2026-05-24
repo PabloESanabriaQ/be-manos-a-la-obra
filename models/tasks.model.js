@@ -11,6 +11,7 @@ const tasksSchema = new Schema({
   created: { type: Date, default: Date.now, required: false },
   dueDate: { type: Date, required: false },
   done: { type: Boolean, required: false, default: false },
+  deletedAt: { type: Date, default: null },
 });
 
 export default mongoose.models['task'] || mongoose.model('task', tasksSchema);

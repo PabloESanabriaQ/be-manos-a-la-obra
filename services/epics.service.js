@@ -7,22 +7,22 @@ import { validateCreateEpic, validateUpdateEpic } from '../utils/validateEpics.j
 const getAll = async (page = 1, limit = 20) => {
   const skip = (page - 1) * limit;
   const [data, total] = await Promise.all([
-    Epic.find().skip(skip).limit(limit),
-    Epic.countDocuments(),
+    Epic.find({ deletedAt: null }).skip(skip).limit(limit),
+    Epic.countDocuments({ deletedAt: null }),
   ]);
   return { data, total };
 };
 
 const getById = async (id) => {
   const epic = await Epic.findById(id);
-  if (!epic) throw new NotFoundError('Epic not found');
+  if (!epic || epic.deletedAt) throw new NotFoundError('Epic not found');
   return epic;
 };
 
 const getStoriesByEpic = async (id) => {
   const epic = await Epic.findById(id);
-  if (!epic) throw new NotFoundError('Epic not found');
-  return Story.find({ epic: id });
+  if (!epic || epic.deletedAt) throw new NotFoundError('Epic not found');
+  return Story.find({ epic: id, deletedAt: null });
 };
 
 const create = (body) => {
@@ -33,7 +33,7 @@ const create = (body) => {
 const update = async (id, body) => {
   validateUpdateEpic(body);
   const epic = await Epic.findById(id);
-  if (!epic) throw new NotFoundError('Epic not found');
+  if (!epic || epic.deletedAt) throw new NotFoundError('Epic not found');
   if (body.project && epic.project.toString() !== body.project.toString()) {
     throw new ValidationError('Cannot change the project of an epic');
   }

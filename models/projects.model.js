@@ -8,6 +8,7 @@ const projectSchema = new Schema({
   members: [{ type: Schema.Types.ObjectId, ref: User, required: true }],
   description: { type: String, required: false },
   icon: { type: String, required: false },
+  deletedAt: { type: Date, default: null },
 });
 
 export default mongoose.models['project'] || mongoose.model('project', projectSchema);

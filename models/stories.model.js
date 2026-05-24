@@ -17,6 +17,7 @@ const storiesSchema = new Schema({
   finished: { type: Date, required: false },
   status: { type: String, enum: ['todo', 'running', 'done'], required: false, default: 'todo' },
   icon: { type: String, required: false },
+  deletedAt: { type: Date, default: null },
 });
 
 export default mongoose.models['story'] || mongoose.model('story', storiesSchema);

@@ -7,22 +7,22 @@ import { validateCreateStory, validateUpdateStory } from '../utils/validateStori
 const getAll = async (page = 1, limit = 20) => {
   const skip = (page - 1) * limit;
   const [data, total] = await Promise.all([
-    Story.find().skip(skip).limit(limit),
-    Story.countDocuments(),
+    Story.find({ deletedAt: null }).skip(skip).limit(limit),
+    Story.countDocuments({ deletedAt: null }),
   ]);
   return { data, total };
 };
 
 const getById = async (id) => {
   const story = await Story.findById(id);
-  if (!story) throw new NotFoundError('Story not found');
+  if (!story || story.deletedAt) throw new NotFoundError('Story not found');
   return story;
 };
 
 const getTasksByStory = async (id) => {
   const story = await Story.findById(id);
-  if (!story) throw new NotFoundError('Story not found');
-  return Task.find({ story: id });
+  if (!story || story.deletedAt) throw new NotFoundError('Story not found');
+  return Task.find({ story: id, deletedAt: null });
 };
 
 const create = (body) => {
@@ -33,7 +33,7 @@ const create = (body) => {
 const update = async (id, body) => {
   validateUpdateStory(body);
   const story = await Story.findById(id);
-  if (!story) throw new NotFoundError('Story not found');
+  if (!story || story.deletedAt) throw new NotFoundError('Story not found');
   if (body.epic && story.epic.toString() !== body.epic.toString()) {
     throw new ValidationError('Cannot change the epic of a story');
   }

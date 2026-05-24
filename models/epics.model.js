@@ -8,6 +8,7 @@ const epicsSchema = new Schema({
   name: { type: String, required: true },
   description: { type: String, required: false },
   icon: { type: String, required: false },
+  deletedAt: { type: Date, default: null },
 });
 
 export default mongoose.models['epic'] || mongoose.model('epic', epicsSchema);
