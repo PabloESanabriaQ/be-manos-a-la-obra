@@ -1,10 +1,10 @@
 import 'dotenv/config';
+import logger from './config/logger.js';
 
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
 const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
 if (missing.length) {
-  // logger no está disponible aún; console.error es intencional aquí
-  console.error(`Error: variables de entorno requeridas no definidas: ${missing.join(', ')}`);
+  logger.error(`variables de entorno requeridas no definidas: ${missing.join(', ')}`);
   process.exit(1);
 }
 
@@ -13,7 +13,6 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
-import logger from './config/logger.js';
 import pinoHttp from 'pino-http';
 import mongoDbConnection from './db/mongoDbConnection.js';
 import errorHandler from './middlewares/errorHandler.js';
