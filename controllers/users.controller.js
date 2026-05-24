@@ -1,5 +1,14 @@
 import * as usersService from '../services/users.service.js';
 
+const getMe = async (req, res, next) => {
+  try {
+    const result = await usersService.getByIdWithoutPwd(req.userId);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const getUsers = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -29,4 +38,4 @@ const getUserByIdWithoutPwd = async (req, res, next) => {
   }
 };
 
-export { getUsers, getUserById, getUserByIdWithoutPwd };
+export { getMe, getUsers, getUserById, getUserByIdWithoutPwd };

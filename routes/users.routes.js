@@ -1,6 +1,7 @@
 import express from 'express';
-import { getUsers, getUserById } from '../controllers/users.controller.js';
+import { getMe, getUsers, getUserById } from '../controllers/users.controller.js';
 import { register } from '../controllers/auth.controller.js';
+import authMiddleware from '../middlewares/authentication.js';
 
 const router = express.Router();
 
@@ -74,6 +75,7 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
+router.get('/me', authMiddleware, (req, res, next) => getMe(req, res, next));
 router.get('/', (req, res, next) => getUsers(req, res, next));
 router.post('/', (req, res, next) => register(req, res, next));
 
