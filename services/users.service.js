@@ -1,7 +1,14 @@
 import User from '../models/users.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 
-const getAll = () => User.find().select('-password');
+const getAll = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    User.find().skip(skip).limit(limit).select('-password'),
+    User.countDocuments(),
+  ]);
+  return { data, total };
+};
 
 const getById = async (id) => {
   const user = await User.findById(id);

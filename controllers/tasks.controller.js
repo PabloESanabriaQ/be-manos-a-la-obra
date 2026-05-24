@@ -2,8 +2,10 @@ import * as tasksService from '../services/tasks.service.js';
 
 const getTasks = async (req, res, next) => {
   try {
-    const result = await tasksService.getAll();
-    res.status(200).json({ data: result });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const { data, total } = await tasksService.getAll(page, limit);
+    res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
   }

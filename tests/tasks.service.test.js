@@ -6,6 +6,7 @@ vi.mock('../models/tasks.model.js', () => {
   MockTask.findById = vi.fn();
   MockTask.findByIdAndUpdate = vi.fn();
   MockTask.findByIdAndDelete = vi.fn();
+  MockTask.countDocuments = vi.fn();
   return { default: MockTask };
 });
 
@@ -20,14 +21,19 @@ describe('TasksService', () => {
   });
 
   describe('getAll', () => {
-    it('devuelve todas las tareas', async () => {
+    it('devuelve todas las tareas paginadas', async () => {
       const fakeTasks = [{ _id: '1', name: 'Tarea A' }];
-      Task.find.mockResolvedValue(fakeTasks);
+      Task.find.mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(fakeTasks),
+        }),
+      });
+      Task.countDocuments.mockResolvedValue(1);
 
-      const result = await getAll();
+      const result = await getAll(1, 20);
 
       expect(Task.find).toHaveBeenCalledOnce();
-      expect(result).toEqual(fakeTasks);
+      expect(result).toEqual({ data: fakeTasks, total: 1 });
     });
   });
 

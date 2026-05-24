@@ -4,6 +4,7 @@ vi.mock('../models/users.model.js', () => {
   const MockUser = vi.fn(function() { return { save: vi.fn() }; });
   MockUser.find = vi.fn();
   MockUser.findById = vi.fn();
+  MockUser.countDocuments = vi.fn();
   return { default: MockUser };
 });
 
@@ -17,14 +18,21 @@ describe('UsersService', () => {
   });
 
   describe('getAll', () => {
-    it('devuelve todos los usuarios sin password', async () => {
+    it('devuelve todos los usuarios sin password paginados', async () => {
       const fakeUsers = [{ _id: '1', username: 'pablo' }];
-      User.find.mockReturnValue({ select: vi.fn().mockResolvedValue(fakeUsers) });
+      User.find.mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockReturnValue({
+            select: vi.fn().mockResolvedValue(fakeUsers),
+          }),
+        }),
+      });
+      User.countDocuments.mockResolvedValue(1);
 
-      const result = await getAll();
+      const result = await getAll(1, 20);
 
       expect(User.find).toHaveBeenCalledOnce();
-      expect(result).toEqual(fakeUsers);
+      expect(result).toEqual({ data: fakeUsers, total: 1 });
     });
   });
 

@@ -4,7 +4,14 @@ import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 import { validateCreateEpic, validateUpdateEpic } from '../utils/validateEpics.js';
 
-const getAll = () => Epic.find();
+const getAll = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    Epic.find().skip(skip).limit(limit),
+    Epic.countDocuments(),
+  ]);
+  return { data, total };
+};
 
 const getById = async (id) => {
   const epic = await Epic.findById(id);

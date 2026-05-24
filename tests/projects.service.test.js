@@ -6,6 +6,7 @@ vi.mock('../models/projects.model.js', () => {
   MockProject.findById = vi.fn();
   MockProject.findByIdAndUpdate = vi.fn();
   MockProject.findByIdAndDelete = vi.fn();
+  MockProject.countDocuments = vi.fn();
   return { default: MockProject };
 });
 
@@ -27,14 +28,19 @@ describe('ProjectsService', () => {
   });
 
   describe('getAll', () => {
-    it('devuelve todos los proyectos', async () => {
+    it('devuelve todos los proyectos paginados', async () => {
       const fakeProjects = [{ _id: '1', name: 'Proyecto A' }];
-      Project.find.mockResolvedValue(fakeProjects);
+      Project.find.mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(fakeProjects),
+        }),
+      });
+      Project.countDocuments.mockResolvedValue(1);
 
-      const result = await getAll();
+      const result = await getAll(1, 20);
 
       expect(Project.find).toHaveBeenCalledOnce();
-      expect(result).toEqual(fakeProjects);
+      expect(result).toEqual({ data: fakeProjects, total: 1 });
     });
   });
 

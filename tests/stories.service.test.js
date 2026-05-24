@@ -5,6 +5,7 @@ vi.mock('../models/stories.model.js', () => {
   MockStory.find = vi.fn();
   MockStory.findById = vi.fn();
   MockStory.findByIdAndUpdate = vi.fn();
+  MockStory.countDocuments = vi.fn();
   return { default: MockStory };
 });
 
@@ -26,14 +27,19 @@ describe('StoriesService', () => {
   });
 
   describe('getAll', () => {
-    it('devuelve todas las stories', async () => {
+    it('devuelve todas las stories paginadas', async () => {
       const fakeStories = [{ _id: '1', name: 'Story A' }];
-      Story.find.mockResolvedValue(fakeStories);
+      Story.find.mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(fakeStories),
+        }),
+      });
+      Story.countDocuments.mockResolvedValue(1);
 
-      const result = await getAll();
+      const result = await getAll(1, 20);
 
       expect(Story.find).toHaveBeenCalledOnce();
-      expect(result).toEqual(fakeStories);
+      expect(result).toEqual({ data: fakeStories, total: 1 });
     });
   });
 

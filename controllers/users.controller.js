@@ -2,8 +2,10 @@ import * as usersService from '../services/users.service.js';
 
 const getUsers = async (req, res, next) => {
   try {
-    const result = await usersService.getAll();
-    res.status(200).json({ data: result });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const { data, total } = await usersService.getAll(page, limit);
+    res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
   }

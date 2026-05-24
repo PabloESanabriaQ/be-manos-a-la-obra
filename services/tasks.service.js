@@ -3,7 +3,14 @@ import { validateCreateTask, validateUpdateTask } from '../utils/validateTasks.j
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 
-const getAll = () => Task.find();
+const getAll = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    Task.find().skip(skip).limit(limit),
+    Task.countDocuments(),
+  ]);
+  return { data, total };
+};
 
 const getById = async (id) => {
   const task = await Task.findById(id);

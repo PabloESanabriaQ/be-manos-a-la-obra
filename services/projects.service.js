@@ -3,7 +3,14 @@ import Epic from '../models/epics.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import { validateCreateProject, validateUpdateProject } from '../utils/validateProjects.js';
 
-const getAll = () => Project.find();
+const getAll = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    Project.find().skip(skip).limit(limit),
+    Project.countDocuments(),
+  ]);
+  return { data, total };
+};
 
 const getById = async (id) => {
   const project = await Project.findById(id);

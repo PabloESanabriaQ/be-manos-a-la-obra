@@ -2,8 +2,10 @@ import * as epicsService from '../services/epics.service.js';
 
 const getEpics = async (req, res, next) => {
   try {
-    const result = await epicsService.getAll();
-    res.status(200).json({ data: result });
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const { data, total } = await epicsService.getAll(page, limit);
+    res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
   }

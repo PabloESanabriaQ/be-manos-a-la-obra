@@ -5,6 +5,7 @@ vi.mock('../models/epics.model.js', () => {
   MockEpic.find = vi.fn();
   MockEpic.findById = vi.fn();
   MockEpic.findByIdAndUpdate = vi.fn();
+  MockEpic.countDocuments = vi.fn();
   return { default: MockEpic };
 });
 
@@ -26,14 +27,19 @@ describe('EpicsService', () => {
   });
 
   describe('getAll', () => {
-    it('devuelve todas las epics', async () => {
+    it('devuelve todas las epics paginadas', async () => {
       const fakeEpics = [{ _id: '1', name: 'Epic A' }];
-      Epic.find.mockResolvedValue(fakeEpics);
+      Epic.find.mockReturnValue({
+        skip: vi.fn().mockReturnValue({
+          limit: vi.fn().mockResolvedValue(fakeEpics),
+        }),
+      });
+      Epic.countDocuments.mockResolvedValue(1);
 
-      const result = await getAll();
+      const result = await getAll(1, 20);
 
       expect(Epic.find).toHaveBeenCalledOnce();
-      expect(result).toEqual(fakeEpics);
+      expect(result).toEqual({ data: fakeEpics, total: 1 });
     });
   });
 

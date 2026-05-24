@@ -4,7 +4,14 @@ import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 import { validateCreateStory, validateUpdateStory } from '../utils/validateStories.js';
 
-const getAll = () => Story.find();
+const getAll = async (page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
+  const [data, total] = await Promise.all([
+    Story.find().skip(skip).limit(limit),
+    Story.countDocuments(),
+  ]);
+  return { data, total };
+};
 
 const getById = async (id) => {
   const story = await Story.findById(id);
