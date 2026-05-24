@@ -1,39 +1,14 @@
 # Skill: Agregar test unitario
 
-Guía para extraer la lógica de negocio a una capa de servicios y escribir unit tests sobre ella.
+Guía para escribir unit tests sobre los servicios en `services/`.
 
-## Por qué una capa de servicios
-
-Los controllers mezclan lógica HTTP (req/res) con lógica de negocio (DB, validaciones). Extraer los servicios permite testear la lógica de negocio en aislamiento, mockeando Mongoose sin levantar servidor ni DB.
+Los servicios contienen toda la lógica de negocio (DB, validaciones, errores de dominio) sin conocimiento de HTTP. Los controllers son delgados y solo traducen HTTP ↔ servicio. Esta separación permite testear la lógica en aislamiento mockeando Mongoose sin levantar servidor ni DB.
 
 ---
 
-## Setup inicial (solo la primera vez)
+## Setup
 
-### Instalar dependencias
-```bash
-npm install -D vitest
-```
-
-### Crear `vitest.config.js` en la raíz
-```js
-import { defineConfig } from 'vitest/config';
-
-export default defineConfig({
-  test: {
-    globals: true,
-    environment: 'node',
-  },
-});
-```
-
-### Actualizar `package.json`
-```json
-"scripts": {
-  "test": "vitest run",
-  "test:watch": "vitest"
-}
-```
+Ya configurado. El proyecto usa Vitest con `vitest.config.js` en la raíz y los scripts `npm test` / `npm run test:watch`.
 
 ---
 
@@ -53,80 +28,28 @@ tests/
 
 ---
 
-## Cómo extraer un servicio desde un controller
-
-Mover toda la lógica de negocio (llamadas a DB, validaciones, throws) a `services/{entidad}.service.js`. El servicio no conoce `req`, `res` ni `next`.
-
-### Antes (en el controller)
-```js
-const updateTask = async (req, res, next) => {
-  try {
-    validateUpdateTask(req.body);
-    const task = await Task.findById(req.params._id);
-    if (!task) throw new NotFoundError('Task not found');
-    if (req.body.story && task.story.toString() !== req.body.story.toString()) {
-      throw new ValidationError('Cannot change the story of a task');
-    }
-    const result = await Task.findByIdAndUpdate(req.params._id, req.body, { new: true });
-    res.status(200).json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-};
-```
-
-### Después — `services/tasks.service.js`
-```js
-const Task = require('../models/tasks.model');
-const { validateCreateTask, validateUpdateTask } = require('../utils/validateTasks');
-const NotFoundError = require('../errors/NotFoundError');
-const ValidationError = require('../errors/ValidationError');
-
-const updateTask = async (id, body) => {
-  validateUpdateTask(body);
-  const task = await Task.findById(id);
-  if (!task) throw new NotFoundError('Task not found');
-  if (body.story && task.story.toString() !== body.story.toString()) {
-    throw new ValidationError('Cannot change the story of a task');
-  }
-  return Task.findByIdAndUpdate(id, body, { new: true });
-};
-
-module.exports = { updateTask };
-```
-
-### Después — `controllers/tasks.controller.js`
-```js
-const tasksService = require('../services/tasks.service');
-
-const updateTask = async (req, res, next) => {
-  try {
-    const result = await tasksService.updateTask(req.params._id, req.body);
-    res.status(200).json({ data: result });
-  } catch (err) {
-    next(err);
-  }
-};
-```
-
-El controller queda delgado: solo traduce HTTP ↔ servicio.
-
----
-
 ## Plantilla de test unitario
+
+El proyecto usa ESM. El mock debe declararse con factory explícita usando `function` (no arrow) para soportar `new`. `vi.mock` se hoist automáticamente al tope del archivo.
 
 ```js
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mockear el modelo ANTES de importar el servicio
-vi.mock('../models/tasks.model');
+vi.mock('../models/{entidad}.model.js', () => {
+  const Mock = vi.fn(function() { return { save: vi.fn() }; });
+  Mock.find = vi.fn();
+  Mock.findById = vi.fn();
+  Mock.findByIdAndUpdate = vi.fn();
+  Mock.findByIdAndDelete = vi.fn();
+  return { default: Mock };
+});
 
-import Task from '../models/tasks.model';
-import { updateTask, createTask, getTaskById } from '../services/tasks.service';
-import NotFoundError from '../errors/NotFoundError';
-import ValidationError from '../errors/ValidationError';
+import Model from '../models/{entidad}.model.js';
+import { getAll, getById, create, update, remove } from '../services/{entidad}.service.js';
+import NotFoundError from '../errors/NotFoundError.js';
+import ValidationError from '../errors/ValidationError.js';
 
-describe('TasksService', () => {
+describe('{Entidad}Service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -134,6 +57,8 @@ describe('TasksService', () => {
   // Tests aquí
 });
 ```
+
+Ver `tests/tasks.service.test.js` como archivo de referencia completo.
 
 ---
 
