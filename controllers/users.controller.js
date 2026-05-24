@@ -1,47 +1,30 @@
-const User = require('../models/users.model');
-const NotFoundError = require('../errors/NotFoundError');
+const usersService = require('../services/users.service');
 
-const getUsers = (req, res, next) => {
-  User.find().select('-password')
-  .then((result) => {
-    res.status(200).json({
-      data: result
-    });
-  })
-  .catch((err) => {
-    next(err)
-  });
-}
-
-const getUserById = (req, res, next) => {
-  User.findById(req.params._id)
-  .then((result) => {
-    if (!result) {
-        const err = new NotFoundError('User not found');
-        err.status = 404;
-        throw err;
-    }
-    res.status(200).json({
-      data: result
-    });
-  })
-  .catch((err) => {
+const getUsers = async (req, res, next) => {
+  try {
+    const result = await usersService.getAll();
+    res.status(200).json({ data: result });
+  } catch (err) {
     next(err);
-  });
-}
-
-const getUserByIdWithoutPwd = (req, res, next) => {
-  User.findById(req.params._id).select('-password')
-  .then(user => {
-      res.json(user);
-  })
-  .catch(error => {
-      next(error);
-  });
-}
-
-module.exports = {
-  getUsers,
-  getUserById,
-  getUserByIdWithoutPwd
+  }
 };
+
+const getUserById = async (req, res, next) => {
+  try {
+    const result = await usersService.getById(req.params._id);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getUserByIdWithoutPwd = async (req, res, next) => {
+  try {
+    const result = await usersService.getByIdWithoutPwd(req.params._id);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getUsers, getUserById, getUserByIdWithoutPwd };
