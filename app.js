@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import cors from 'cors';
 import mongoDbConnection from './db/mongoDbConnection.js';
 import errorHandler from './middlewares/errorHandler.js';
 import authMiddleware from './middlewares/authentication.js';
@@ -18,9 +19,11 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => console.log('Running in port: ' + PORT));
 
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(express.json());
-
-//TODO: no olvidar CORS cuando lo conecte al front
 
 app.use('/api/login', loginRouter);
 app.use('/api/epics', authMiddleware, epicsRouter);
