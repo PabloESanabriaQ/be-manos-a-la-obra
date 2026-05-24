@@ -1,4 +1,12 @@
 import 'dotenv/config';
+
+const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
+const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missing.length) {
+  console.error(`Error: variables de entorno requeridas no definidas: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
