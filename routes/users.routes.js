@@ -1,5 +1,5 @@
 import express from 'express';
-import { getMe, getUsers, getUserById } from '../controllers/users.controller.js';
+import { getMe, getUsers, getUserById, updatePassword } from '../controllers/users.controller.js';
 import { register } from '../controllers/auth.controller.js';
 import authMiddleware from '../middlewares/authentication.js';
 
@@ -76,6 +76,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/me', authMiddleware, (req, res, next) => getMe(req, res, next));
+router.patch('/me/password', authMiddleware, (req, res, next) => updatePassword(req, res, next));
 router.get('/', (req, res, next) => getUsers(req, res, next));
 router.post('/', (req, res, next) => register(req, res, next));
 

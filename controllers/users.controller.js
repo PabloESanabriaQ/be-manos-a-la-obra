@@ -38,4 +38,14 @@ const getUserByIdWithoutPwd = async (req, res, next) => {
   }
 };
 
-export { getMe, getUsers, getUserById, getUserByIdWithoutPwd };
+const updatePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    await usersService.updatePassword(req.userId, currentPassword, newPassword);
+    res.status(200).json({ message: 'Password updated' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getMe, getUsers, getUserById, getUserByIdWithoutPwd, updatePassword };
