@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getEpicById, getStoriesByEpic, getEpics  } = require('../controllers/epics.controller');
+const { getEpicById, getStoriesByEpic, getEpics, createEpic, updateEpic } = require('../controllers/epics.controller');
 
 router.get('/', 
 	(req, res) => {
@@ -17,6 +17,18 @@ router.get('/:_id',
 router.get('/:_id/stories', 
 	(req, res, next) => {
     return getStoriesByEpic(req, res, next);
+  }
+);
+
+router.post('/',
+  (req, res, next) => {
+    return createEpic(req, res, next);
+  }
+);
+
+router.put('/:_id',
+  (req, res, next) => {
+    return updateEpic(req, res, next);
   }
 );
 

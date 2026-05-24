@@ -1,0 +1,17 @@
+node_modules/
+
+# Variables de entorno
+.env
+.env.*
+!.env.example
+
+# Notas y documentos internos
+TODO.md
+
+# Logs
+*.log
+logs/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db

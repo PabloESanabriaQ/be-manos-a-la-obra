@@ -18,13 +18,13 @@ router.get('/',
 
 router.get('/:_id', 
 	(req, res, next) => {
-    return getProjectById(req, res. next);
+    return getProjectById(req, res, next);
   }
 );
 
 router.get('/:_id/epics', 
 	(req, res, next) => {
-    return getEpicsByProject(req, res. next);
+    return getEpicsByProject(req, res, next);
   }
 );
 

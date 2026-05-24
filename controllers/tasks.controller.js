@@ -3,7 +3,7 @@ const { validateCreateTask, validateUpdateTask } = require('../utils/validateTas
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 
-const getTasks = (req, res) => {
+const getTasks = (req, res, next) => {
   Task.find()
   .then((result) => {
     res.status(200).json({
@@ -46,15 +46,21 @@ const createTask = (req, res, next) => {
   });
 }
 
-const updateTask = (req, res, next) => {
-  validateUpdateTask(req.body);
-  const task = Task.findById(req.params._id);
-  const newTask = new Task(req.body);
-  if(task.story !== newTask.story) {
-    throw new ValidationError('Cannot change the story of a task');
+const updateTask = async (req, res, next) => {
+  try {
+    validateUpdateTask(req.body);
+    const task = await Task.findById(req.params._id);
+    if (!task) {
+      throw new NotFoundError('Task not found');
+    }
+    if (req.body.story && task.story.toString() !== req.body.story.toString()) {
+      throw new ValidationError('Cannot change the story of a task');
+    }
+    const result = await Task.findByIdAndUpdate(req.params._id, req.body, { new: true });
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
   }
-  
-  Task.findByIdAndUpdate(req.params._id, newTask, {new: true});
 }
 
 const deleteTask = (req, res, next) => {

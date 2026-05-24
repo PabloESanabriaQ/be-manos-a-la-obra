@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const NotFoundError = require('../errors/NotFoundError');
 const ValidationError = require('../errors/ValidationError');
 
-const getStories = (req, res) => {
+const getStories = (req, res, next) => {
   Story.find()
   .then((result) => {
     res.status(200).json({
@@ -35,22 +35,17 @@ const getStoryById = (req, res, next) => {
   });
 }
 
-const getTasksByStory = (req, res, next) => {
-  const story = Story.findById(req.params._id);
-  if (!story) {
-    const err = new NotFoundError('Story not found');
-    err.status = 404;
-    throw err;
+const getTasksByStory = async (req, res, next) => {
+  try {
+    const story = await Story.findById(req.params._id);
+    if (!story) {
+      throw new NotFoundError('Story not found');
+    }
+    const result = await Task.find({ story: req.params._id });
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
   }
-  Task.find({story: req.params._id})
-  .then((result) => {
-    res.status(200).json({
-      data: result
-    });
-  })
-  .catch((err) => {
-    next(err)
-  });
 }
 
 const createStory = (req, res, next) => {
@@ -67,15 +62,21 @@ const createStory = (req, res, next) => {
   });
 }
 
-const updateStory = (req, res, next) => {
+const updateStory = async (req, res, next) => {
   //validateUpdateStory(req.body);
-  const story = Story.findById(req.params._id);
-  const newStory = new Story(req.body);
-  if(story.epic !== newStory.epic) {
-    throw new ValidationError('Cannot change the epic of a story');
+  try {
+    const story = await Story.findById(req.params._id);
+    if (!story) {
+      throw new NotFoundError('Story not found');
+    }
+    if (req.body.epic && story.epic.toString() !== req.body.epic.toString()) {
+      throw new ValidationError('Cannot change the epic of a story');
+    }
+    const result = await Story.findByIdAndUpdate(req.params._id, req.body, { new: true });
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
   }
-  
-  Story.findByIdAndUpdate(req.params._id, newStory, {new: true});
 }
 
 module.exports = { 

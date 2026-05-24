@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getStoryById, getStories, getTasksByStory  } = require('../controllers/stories.controller');
+const { getStoryById, getStories, getTasksByStory, createStory, updateStory } = require('../controllers/stories.controller');
 
 
 router.get('/', 
@@ -18,6 +18,18 @@ router.get('/:_id',
 router.get('/:_id/tasks', 
 	(req, res, next) => {
     return getTasksByStory(req, res, next);
+  }
+);
+
+router.post('/',
+  (req, res, next) => {
+    return createStory(req, res, next);
+  }
+);
+
+router.put('/:_id',
+  (req, res, next) => {
+    return updateStory(req, res, next);
   }
 );
 

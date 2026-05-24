@@ -4,7 +4,7 @@ const Epic = require('../models/epics.model');
 //const { validateCreateProject, validateUpdateProject } = require('../utils/validateProjects');
 const NotFoundError = require('../errors/NotFoundError');
 
-const getProjects = (req, res) => {
+const getProjects = (req, res, next) => {
   Project.find()
   .then((result) => {
     res.status(200).json({
@@ -33,22 +33,17 @@ const getProjectById = (req, res, next) => {
   });
 }
 
-const getEpicsByProject = (req, res, next) => {
-  const project = Project.findById(req.params._id);
-  if (!project) {
-    const err = new NotFoundError('Project not found');
-    err.status = 404;
-    throw err;
+const getEpicsByProject = async (req, res, next) => {
+  try {
+    const project = await Project.findById(req.params._id);
+    if (!project) {
+      throw new NotFoundError('Project not found');
+    }
+    const result = await Epic.find({ project: req.params._id });
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
   }
-  Epic.find({story: req.params._id})
-  .then((result) => {
-    res.status(200).json({
-      data: result
-    });
-  })
-  .catch((err) => {
-    next(err)
-  });
 }
 
 const createProject = (req, res, next) => {
@@ -65,11 +60,17 @@ const createProject = (req, res, next) => {
   });
 }
 
-const updateProject = (req, res, next) => {
+const updateProject = async (req, res, next) => {
   //validateUpdateProject(req.body);
-  const newProject = new Project(req.body);
-  
-  Task.findByIdAndUpdate(req.params._id, newProject, {new: true});
+  try {
+    const result = await Project.findByIdAndUpdate(req.params._id, req.body, { new: true });
+    if (!result) {
+      throw new NotFoundError('Project not found');
+    }
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
 }
 
 const deleteProject = (req, res, next) => {
@@ -80,6 +81,9 @@ const deleteProject = (req, res, next) => {
       data: result
     });
   })
+  .catch((err) => {
+    next(err);
+  });
 }
 
 module.exports = { 

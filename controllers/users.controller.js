@@ -1,8 +1,8 @@
 const User = require('../models/users.model');
 const NotFoundError = require('../errors/NotFoundError');
 
-const getUsers = (req, res) => {
-  User.find()
+const getUsers = (req, res, next) => {
+  User.find().select('-password')
   .then((result) => {
     res.status(200).json({
       data: result
