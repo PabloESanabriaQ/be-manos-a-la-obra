@@ -2,6 +2,7 @@ import Epic from '../models/epics.model.js';
 import Story from '../models/stories.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
+import { validateCreateEpic, validateUpdateEpic } from '../utils/validateEpics.js';
 
 const getAll = () => Epic.find();
 
@@ -17,9 +18,13 @@ const getStoriesByEpic = async (id) => {
   return Story.find({ epic: id });
 };
 
-const create = (body) => new Epic(body).save();
+const create = (body) => {
+  validateCreateEpic(body);
+  return new Epic(body).save();
+};
 
 const update = async (id, body) => {
+  validateUpdateEpic(body);
   const epic = await Epic.findById(id);
   if (!epic) throw new NotFoundError('Epic not found');
   if (body.project && epic.project.toString() !== body.project.toString()) {

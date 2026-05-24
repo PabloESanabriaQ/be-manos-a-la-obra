@@ -1,6 +1,7 @@
 import Project from '../models/projects.model.js';
 import Epic from '../models/epics.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
+import { validateCreateProject, validateUpdateProject } from '../utils/validateProjects.js';
 
 const getAll = () => Project.find();
 
@@ -16,9 +17,13 @@ const getEpicsByProject = async (id) => {
   return Epic.find({ project: id });
 };
 
-const create = (body) => new Project(body).save();
+const create = (body) => {
+  validateCreateProject(body);
+  return new Project(body).save();
+};
 
 const update = async (id, body) => {
+  validateUpdateProject(body);
   const result = await Project.findByIdAndUpdate(id, body, { new: true });
   if (!result) throw new NotFoundError('Project not found');
   return result;

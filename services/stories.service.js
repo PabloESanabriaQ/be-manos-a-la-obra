@@ -2,6 +2,7 @@ import Story from '../models/stories.model.js';
 import Task from '../models/tasks.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
+import { validateCreateStory, validateUpdateStory } from '../utils/validateStories.js';
 
 const getAll = () => Story.find();
 
@@ -17,9 +18,13 @@ const getTasksByStory = async (id) => {
   return Task.find({ story: id });
 };
 
-const create = (body) => new Story(body).save();
+const create = (body) => {
+  validateCreateStory(body);
+  return new Story(body).save();
+};
 
 const update = async (id, body) => {
+  validateUpdateStory(body);
   const story = await Story.findById(id);
   if (!story) throw new NotFoundError('Story not found');
   if (body.epic && story.epic.toString() !== body.epic.toString()) {
