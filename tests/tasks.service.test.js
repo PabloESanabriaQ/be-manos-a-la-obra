@@ -69,6 +69,10 @@ describe('TasksService', () => {
     it('lanza ValidationError si falta story', () => {
       expect(() => create({ name: 'Tarea' })).toThrow(ValidationError);
     });
+
+    it('lanza ValidationError si status es inválido', () => {
+      expect(() => create({ name: 'Tarea', story: 'story-id', status: 'invalido' })).toThrow(ValidationError);
+    });
   });
 
   describe('update', () => {
