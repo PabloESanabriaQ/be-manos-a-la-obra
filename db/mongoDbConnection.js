@@ -1,12 +1,14 @@
 import mongoose from 'mongoose';
 import 'dotenv/config';
+import logger from '../config/logger.js';
 
 const mongoDbConnection = () => mongoose.connect(
-  process.env.DB_CONNECTION
+  process.env.MONGO_URI
 ).then(() => {
-  console.log('DB connection successful');
+  logger.info('Conexión a MongoDB exitosa');
 }).catch((error) => {
-  console.error('The connection failed:', error);
+  logger.error({ err: error }, 'Error al conectar con MongoDB');
+  process.exit(1);
 });
 
 export default mongoDbConnection;

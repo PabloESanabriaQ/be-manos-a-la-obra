@@ -3,6 +3,7 @@ import 'dotenv/config';
 const REQUIRED_ENV = ['MONGO_URI', 'JWT_SECRET'];
 const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
 if (missing.length) {
+  // logger no está disponible aún; console.error es intencional aquí
   console.error(`Error: variables de entorno requeridas no definidas: ${missing.join(', ')}`);
   process.exit(1);
 }
@@ -12,6 +13,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import swaggerSpec from './config/swagger.js';
+import logger from './config/logger.js';
+import pinoHttp from 'pino-http';
 import mongoDbConnection from './db/mongoDbConnection.js';
 import errorHandler from './middlewares/errorHandler.js';
 import authMiddleware from './middlewares/authentication.js';
@@ -29,7 +32,7 @@ mongoDbConnection();
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => console.log('Running in port: ' + PORT));
+app.listen(PORT, () => logger.info({ port: PORT }, `Servidor escuchando en puerto ${PORT}`));
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
@@ -37,6 +40,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.json());
+app.use(pinoHttp({ logger }));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
