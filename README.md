@@ -72,6 +72,48 @@ http://localhost:3000/api-docs
 
 Desde ahí podés explorar todos los endpoints, ver los schemas de request/response y probar llamadas directamente.
 
+## Seed de datos
+
+El script `scripts/seed.js` limpia la base de datos e inserta datos de prueba (usuarios, proyectos, épicas, historias y tareas).
+
+### Correr el seed localmente contra producción (Render)
+
+**Paso 1 — Obtener el `MONGO_URI` de Render**
+
+1. Entrá a [dashboard.render.com](https://dashboard.render.com)
+2. Seleccioná tu servicio
+3. Andá a la pestaña **Environment**
+4. Copiá el valor de la variable `MONGO_URI`
+
+**Paso 2 — Ejecutar el script**
+
+```bash
+MONGO_URI="<el valor que copiaste>" npm run seed
+```
+
+**Paso 3 — Verificar que funcionó**
+
+```
+✓ Conectado a MongoDB
+✓ Colecciones limpiadas
+✓ Usuarios creados (4)
+✓ Proyectos creados (2)
+✓ Épicas creadas (4)
+✓ Historias creadas (8)
+✓ Tareas creadas (16)
+```
+
+> **Atención:** el seed borra todos los datos existentes antes de insertar. No correrlo en producción con datos reales.
+
+### Credenciales generadas
+
+| Usuario | Contraseña | Rol |
+|---------|-----------|-----|
+| `admin` | `admin123` | `admin_users` |
+| `pm` | `pm123` | `admin_projects` |
+| `dev1` | `dev1123` | `member` |
+| `dev2` | `dev2123` | `member` |
+
 ## Endpoints principales
 
 | Método | Ruta | Descripción |
