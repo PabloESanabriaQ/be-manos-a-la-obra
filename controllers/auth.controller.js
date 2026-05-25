@@ -1,9 +1,11 @@
 import * as authService from '../services/auth.service.js';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const BASE_COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'strict',
 };
 
 const setAuthCookies = (res, { accessToken, refreshToken }) => {
