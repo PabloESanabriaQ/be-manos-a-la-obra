@@ -1,5 +1,7 @@
 import express from 'express';
-import { getStories, getStoryById, getTasksByStory, createStory, updateStory } from '../controllers/stories.controller.js';
+import { getStories, getStoryById, getTasksByStory, createStory, updateStory, deleteStory } from '../controllers/stories.controller.js';
+import resolveProjectId from '../middlewares/resolveProjectId.js';
+import requireProjectAccess from '../middlewares/requireProjectAccess.js';
 
 const router = express.Router();
 
@@ -60,7 +62,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', (req, res, next) => getStories(req, res, next));
-router.post('/', (req, res, next) => createStory(req, res, next));
+router.post('/', resolveProjectId('story'), requireProjectAccess('story', 'create'), (req, res, next) => createStory(req, res, next));
 
 /**
  * @swagger
@@ -120,8 +122,9 @@ router.post('/', (req, res, next) => createStory(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id', (req, res, next) => getStoryById(req, res, next));
-router.put('/:_id', (req, res, next) => updateStory(req, res, next));
+router.get('/:_id', resolveProjectId('story'), requireProjectAccess('story', 'read'), (req, res, next) => getStoryById(req, res, next));
+router.put('/:_id', resolveProjectId('story'), requireProjectAccess('story', 'edit'), (req, res, next) => updateStory(req, res, next));
+router.delete('/:_id', resolveProjectId('story'), requireProjectAccess('story', 'delete'), (req, res, next) => deleteStory(req, res, next));
 
 /**
  * @swagger
@@ -150,6 +153,6 @@ router.put('/:_id', (req, res, next) => updateStory(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id/tasks', (req, res, next) => getTasksByStory(req, res, next));
+router.get('/:_id/tasks', resolveProjectId('story'), requireProjectAccess('task', 'read'), (req, res, next) => getTasksByStory(req, res, next));
 
 export default router;

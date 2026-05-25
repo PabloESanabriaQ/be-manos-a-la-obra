@@ -4,7 +4,7 @@ const getProjects = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const { data, total } = await projectsService.getAll(page, limit);
+    const { data, total } = await projectsService.getAll(page, limit, req.userId, req.userRole);
     res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
@@ -56,4 +56,13 @@ const deleteProject = async (req, res, next) => {
   }
 };
 
-export { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject };
+const updateProjectMembers = async (req, res, next) => {
+  try {
+    const result = await projectsService.updateMembers(req.params._id, req.body.members);
+    res.status(200).json({ data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject, updateProjectMembers };

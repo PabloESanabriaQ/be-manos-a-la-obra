@@ -4,7 +4,7 @@ const getEpics = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const { data, total } = await epicsService.getAll(page, limit);
+    const { data, total } = await epicsService.getAll(page, limit, req.userId);
     res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
@@ -47,4 +47,13 @@ const updateEpic = async (req, res, next) => {
   }
 };
 
-export { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic };
+const deleteEpic = async (req, res, next) => {
+  try {
+    await epicsService.remove(req.params._id);
+    res.status(200).json({ data: null });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic, deleteEpic };

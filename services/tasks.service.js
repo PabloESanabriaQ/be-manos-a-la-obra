@@ -1,13 +1,23 @@
 import Task from '../models/tasks.model.js';
+import Story from '../models/stories.model.js';
+import Epic from '../models/epics.model.js';
+import Project from '../models/projects.model.js';
 import { validateCreateTask, validateUpdateTask } from '../utils/validateTasks.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 
-const getAll = async (page = 1, limit = 20) => {
+const getAll = async (page = 1, limit = 20, userId) => {
   const skip = (page - 1) * limit;
+  const filter = { deletedAt: null };
+  if (userId) {
+    const projects = await Project.find({ 'members.user': userId }).select('_id');
+    const epics = await Epic.find({ project: { $in: projects.map((p) => p._id) }, deletedAt: null }).select('_id');
+    const stories = await Story.find({ epic: { $in: epics.map((e) => e._id) }, deletedAt: null }).select('_id');
+    filter.story = { $in: stories.map((s) => s._id) };
+  }
   const [data, total] = await Promise.all([
-    Task.find({ deletedAt: null }).skip(skip).limit(limit),
-    Task.countDocuments({ deletedAt: null }),
+    Task.find(filter).skip(skip).limit(limit),
+    Task.countDocuments(filter),
   ]);
   return { data, total };
 };

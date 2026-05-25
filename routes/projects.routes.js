@@ -1,5 +1,7 @@
 import express from 'express';
-import { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject } from '../controllers/projects.controller.js';
+import { getProjects, getProjectById, getEpicsByProject, createProject, updateProject, deleteProject, updateProjectMembers } from '../controllers/projects.controller.js';
+import requireRole from '../middlewares/requireRole.js';
+import requireProjectAccess from '../middlewares/requireProjectAccess.js';
 
 const router = express.Router();
 
@@ -60,7 +62,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', (req, res, next) => getProjects(req, res, next));
-router.post('/', (req, res, next) => createProject(req, res, next));
+router.post('/', requireRole('admin_users'), (req, res, next) => createProject(req, res, next));
 
 /**
  * @swagger
@@ -149,10 +151,10 @@ router.post('/', (req, res, next) => createProject(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id', (req, res, next) => getProjectById(req, res, next));
-router.put('/:_id', (req, res, next) => updateProject(req, res, next));
-router.patch('/:_id', (req, res, next) => updateProject(req, res, next));
-router.delete('/:_id', (req, res, next) => deleteProject(req, res, next));
+router.get('/:_id', requireProjectAccess('project', 'read'), (req, res, next) => getProjectById(req, res, next));
+router.put('/:_id', requireProjectAccess('project', 'edit'), (req, res, next) => updateProject(req, res, next));
+router.patch('/:_id', requireProjectAccess('project', 'edit'), (req, res, next) => updateProject(req, res, next));
+router.delete('/:_id', requireProjectAccess('project', 'delete'), (req, res, next) => deleteProject(req, res, next));
 
 /**
  * @swagger
@@ -181,6 +183,7 @@ router.delete('/:_id', (req, res, next) => deleteProject(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id/epics', (req, res, next) => getEpicsByProject(req, res, next));
+router.get('/:_id/epics', requireProjectAccess('epic', 'read'), (req, res, next) => getEpicsByProject(req, res, next));
+router.put('/:_id/members', requireRole('admin_users'), (req, res, next) => updateProjectMembers(req, res, next));
 
 export default router;

@@ -1,5 +1,7 @@
 import express from 'express';
 import { getTasks, getTaskById, createTask, updateTask, deleteTask } from '../controllers/tasks.controller.js';
+import resolveProjectId from '../middlewares/resolveProjectId.js';
+import requireProjectAccess from '../middlewares/requireProjectAccess.js';
 
 const router = express.Router();
 
@@ -60,7 +62,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', (req, res, next) => getTasks(req, res, next));
-router.post('/', (req, res, next) => createTask(req, res, next));
+router.post('/', resolveProjectId('task'), requireProjectAccess('task', 'create'), (req, res, next) => createTask(req, res, next));
 
 /**
  * @swagger
@@ -155,9 +157,9 @@ router.post('/', (req, res, next) => createTask(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id', (req, res, next) => getTaskById(req, res, next));
-router.put('/:_id', (req, res, next) => updateTask(req, res, next));
-router.patch('/:_id', (req, res, next) => updateTask(req, res, next));
-router.delete('/:_id', (req, res, next) => deleteTask(req, res, next));
+router.get('/:_id', resolveProjectId('task'), requireProjectAccess('task', 'read'), (req, res, next) => getTaskById(req, res, next));
+router.put('/:_id', resolveProjectId('task'), requireProjectAccess('task', 'edit'), (req, res, next) => updateTask(req, res, next));
+router.patch('/:_id', resolveProjectId('task'), requireProjectAccess('task', 'edit'), (req, res, next) => updateTask(req, res, next));
+router.delete('/:_id', resolveProjectId('task'), requireProjectAccess('task', 'delete'), (req, res, next) => deleteTask(req, res, next));
 
 export default router;

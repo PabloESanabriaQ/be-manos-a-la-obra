@@ -65,8 +65,13 @@ const options = {
             description: { type: 'string', example: 'Descripción del proyecto' },
             members: {
               type: 'array',
-              items: { type: 'string' },
-              example: ['64a1f2c3d4e5f6a7b8c9d0e2'],
+              items: {
+                type: 'object',
+                properties: {
+                  user: { type: 'string', example: '64a1f2c3d4e5f6a7b8c9d0e2' },
+                  role: { type: 'string', enum: ['admin_projects', 'member'] },
+                },
+              },
             },
           },
         },
@@ -78,8 +83,14 @@ const options = {
             description: { type: 'string', example: 'Descripción del proyecto' },
             members: {
               type: 'array',
-              items: { type: 'string' },
-              example: ['64a1f2c3d4e5f6a7b8c9d0e2'],
+              items: {
+                type: 'object',
+                required: ['user', 'role'],
+                properties: {
+                  user: { type: 'string', example: '64a1f2c3d4e5f6a7b8c9d0e2' },
+                  role: { type: 'string', enum: ['admin_projects', 'member'] },
+                },
+              },
             },
           },
         },

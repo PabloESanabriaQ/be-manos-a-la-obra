@@ -1,7 +1,8 @@
 import express from 'express';
-import { getMe, getUsers, getUserById, updatePassword } from '../controllers/users.controller.js';
+import { getMe, getUsers, getUserById, updatePassword, updateUser, deactivateUser } from '../controllers/users.controller.js';
 import { register } from '../controllers/auth.controller.js';
 import authMiddleware from '../middlewares/authentication.js';
+import requireRole from '../middlewares/requireRole.js';
 
 const router = express.Router();
 
@@ -77,8 +78,8 @@ const router = express.Router();
  */
 router.get('/me', authMiddleware, (req, res, next) => getMe(req, res, next));
 router.patch('/me/password', authMiddleware, (req, res, next) => updatePassword(req, res, next));
-router.get('/', (req, res, next) => getUsers(req, res, next));
-router.post('/', (req, res, next) => register(req, res, next));
+router.get('/', requireRole('admin_users'), (req, res, next) => getUsers(req, res, next));
+router.post('/', requireRole('admin_users'), (req, res, next) => register(req, res, next));
 
 /**
  * @swagger
@@ -105,6 +106,8 @@ router.post('/', (req, res, next) => register(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id', (req, res, next) => getUserById(req, res, next));
+router.get('/:_id', requireRole('admin_users'), (req, res, next) => getUserById(req, res, next));
+router.patch('/:_id/deactivate', requireRole('admin_users'), (req, res, next) => deactivateUser(req, res, next));
+router.patch('/:_id', requireRole('admin_users'), (req, res, next) => updateUser(req, res, next));
 
 export default router;

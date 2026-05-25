@@ -5,11 +5,15 @@ import Task from '../models/tasks.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import { validateCreateProject, validateUpdateProject } from '../utils/validateProjects.js';
 
-const getAll = async (page = 1, limit = 20) => {
+const getAll = async (page = 1, limit = 20, userId, userRole) => {
   const skip = (page - 1) * limit;
+  const filter = { deletedAt: null };
+  if (userRole !== 'admin_users' && userId) {
+    filter['members.user'] = userId;
+  }
   const [data, total] = await Promise.all([
-    Project.find({ deletedAt: null }).skip(skip).limit(limit),
-    Project.countDocuments({ deletedAt: null }),
+    Project.find(filter).skip(skip).limit(limit),
+    Project.countDocuments(filter),
   ]);
   return { data, total };
 };
@@ -54,4 +58,10 @@ const remove = async (id) => {
   }
 };
 
-export { getAll, getById, getEpicsByProject, create, update, remove };
+const updateMembers = async (id, members) => {
+  const project = await Project.findById(id);
+  if (!project || project.deletedAt) throw new NotFoundError('Project not found');
+  return Project.findByIdAndUpdate(id, { members }, { new: true });
+};
+
+export { getAll, getById, getEpicsByProject, create, update, remove, updateMembers };

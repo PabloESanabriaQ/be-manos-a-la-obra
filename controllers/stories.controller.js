@@ -4,7 +4,7 @@ const getStories = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const { data, total } = await storiesService.getAll(page, limit);
+    const { data, total } = await storiesService.getAll(page, limit, req.userId);
     res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);
@@ -47,4 +47,13 @@ const updateStory = async (req, res, next) => {
   }
 };
 
-export { getStories, getStoryById, getTasksByStory, createStory, updateStory };
+const deleteStory = async (req, res, next) => {
+  try {
+    await storiesService.remove(req.params._id);
+    res.status(200).json({ data: null });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export { getStories, getStoryById, getTasksByStory, createStory, updateStory, deleteStory };

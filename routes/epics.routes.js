@@ -1,5 +1,7 @@
 import express from 'express';
-import { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic } from '../controllers/epics.controller.js';
+import { getEpics, getEpicById, getStoriesByEpic, createEpic, updateEpic, deleteEpic } from '../controllers/epics.controller.js';
+import resolveProjectId from '../middlewares/resolveProjectId.js';
+import requireProjectAccess from '../middlewares/requireProjectAccess.js';
 
 const router = express.Router();
 
@@ -60,7 +62,7 @@ const router = express.Router();
  *               $ref: '#/components/schemas/Error'
  */
 router.get('/', (req, res, next) => getEpics(req, res, next));
-router.post('/', (req, res, next) => createEpic(req, res, next));
+router.post('/', resolveProjectId('epic'), requireProjectAccess('epic', 'create'), (req, res, next) => createEpic(req, res, next));
 
 /**
  * @swagger
@@ -120,8 +122,9 @@ router.post('/', (req, res, next) => createEpic(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id', (req, res, next) => getEpicById(req, res, next));
-router.put('/:_id', (req, res, next) => updateEpic(req, res, next));
+router.get('/:_id', resolveProjectId('epic'), requireProjectAccess('epic', 'read'), (req, res, next) => getEpicById(req, res, next));
+router.put('/:_id', resolveProjectId('epic'), requireProjectAccess('epic', 'edit'), (req, res, next) => updateEpic(req, res, next));
+router.delete('/:_id', resolveProjectId('epic'), requireProjectAccess('epic', 'delete'), (req, res, next) => deleteEpic(req, res, next));
 
 /**
  * @swagger
@@ -150,6 +153,6 @@ router.put('/:_id', (req, res, next) => updateEpic(req, res, next));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get('/:_id/stories', (req, res, next) => getStoriesByEpic(req, res, next));
+router.get('/:_id/stories', resolveProjectId('epic'), requireProjectAccess('story', 'read'), (req, res, next) => getStoriesByEpic(req, res, next));
 
 export default router;

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import User from '../models/users.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import InvalidCredentialsError from '../errors/InvalidCredentialsError.js';
+import ValidationError from '../errors/ValidationError.js';
 
 const getAll = async (page = 1, limit = 20) => {
   const skip = (page - 1) * limit;
@@ -32,4 +33,18 @@ const updatePassword = async (id, currentPassword, newPassword) => {
   await user.save();
 };
 
-export { getAll, getById, getByIdWithoutPwd, updatePassword };
+const update = async (id, body) => {
+  const user = await User.findById(id);
+  if (!user) throw new NotFoundError('User not found');
+  const { email, username, name } = body;
+  return User.findByIdAndUpdate(id, { email, username, name }, { new: true }).select('-password');
+};
+
+const deactivate = async (id) => {
+  const user = await User.findById(id);
+  if (!user) throw new NotFoundError('User not found');
+  if (!user.active) throw new ValidationError('User is already deactivated');
+  return User.findByIdAndUpdate(id, { active: false }, { new: true }).select('-password');
+};
+
+export { getAll, getById, getByIdWithoutPwd, updatePassword, update, deactivate };
