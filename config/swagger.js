@@ -164,6 +164,15 @@ const options = {
             _id: { type: 'string', example: '64a1f2c3d4e5f6a7b8c9d0e1' },
             username: { type: 'string', example: 'pablo' },
             email: { type: 'string', format: 'email', example: 'pablo@example.com' },
+            name: {
+              type: 'object',
+              properties: {
+                first: { type: 'string', example: 'Pablo' },
+                last: { type: 'string', example: 'Sanabria' },
+              },
+            },
+            role: { type: 'string', enum: ['admin_users', 'admin_projects', 'member'], example: 'member' },
+            active: { type: 'boolean', example: true },
           },
         },
       },

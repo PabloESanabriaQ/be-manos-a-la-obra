@@ -15,8 +15,8 @@ const setAuthCookies = (res, { accessToken, refreshToken }) => {
 
 const register = async (req, res, next) => {
   try {
-    const { username, password, email } = req.body;
-    const tokens = await authService.register(username, password, email);
+    const { username, password, email, name } = req.body;
+    const tokens = await authService.register(username, password, email, name);
     setAuthCookies(res, tokens);
     res.status(201).json({ message: 'Usuario creado' });
   } catch (err) {

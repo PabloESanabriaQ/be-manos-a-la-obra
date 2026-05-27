@@ -19,13 +19,13 @@ const generateTokens = async (userId) => {
   return { accessToken, refreshToken: rawToken };
 };
 
-const register = async (username, password, email) => {
+const register = async (username, password, email, name) => {
   const existing = await User.findOne({ username });
   if (existing) throw new UsernameAlreadyExistsError();
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  const user = await new User({ username, email, password: hashedPassword }).save();
+  const user = await new User({ username, email, password: hashedPassword, name }).save();
 
   return generateTokens(user._id);
 };

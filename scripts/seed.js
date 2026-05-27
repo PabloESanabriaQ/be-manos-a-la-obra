@@ -30,24 +30,28 @@ async function seed() {
       email: 'admin@test.com',
       password: await hash('admin123'),
       role: 'admin_users',
+      name: { first: 'Ada', last: 'Admin' },
     },
     {
       username: 'pm',
       email: 'pm@test.com',
       password: await hash('pm123'),
       role: 'admin_projects',
+      name: { first: 'Pablo', last: 'Manager' },
     },
     {
       username: 'dev1',
       email: 'dev1@test.com',
       password: await hash('dev1123'),
       role: 'member',
+      name: { first: 'Dev', last: 'Uno' },
     },
     {
       username: 'dev2',
       email: 'dev2@test.com',
       password: await hash('dev2123'),
       role: 'member',
+      name: { first: 'Dev', last: 'Dos' },
     },
   ]);
   console.log('✓ Usuarios creados (4)');

@@ -58,6 +58,15 @@ const router = express.Router();
  *                 type: string
  *                 format: email
  *                 example: pablo@example.com
+ *               name:
+ *                 type: object
+ *                 properties:
+ *                   first:
+ *                     type: string
+ *                     example: Pablo
+ *                   last:
+ *                     type: string
+ *                     example: Sanabria
  *     responses:
  *       201:
  *         description: Usuario creado. Setea la cookie `token`.
