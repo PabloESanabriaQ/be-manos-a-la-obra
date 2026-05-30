@@ -37,7 +37,7 @@ async function seed() {
       email: 'pm@test.com',
       password: await hash('pm123'),
       role: 'admin_projects',
-      name: { first: 'Pablo', last: 'Manager' },
+      name: { first: 'Walter', last: 'Molina' },
     },
     {
       username: 'dev1',
