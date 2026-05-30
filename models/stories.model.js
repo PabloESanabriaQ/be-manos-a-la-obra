@@ -10,7 +10,7 @@ const storiesSchema = new Schema({
   epic: { type: Schema.Types.ObjectId, ref: Epic, required: true },
   owner: { type: Schema.Types.ObjectId, ref: User, required: false },
   assignedTo: [{ type: Schema.Types.ObjectId, ref: User, required: false }],
-  points: { type: Number, required: false, default: 0, min: 0, max: 5 },
+  points: { type: Number, required: false, default: 0, enum: [0, 1, 2, 3, 5, 8, 13, 21] },
   created: { type: Date, default: Date.now, required: false },
   due: { type: Date, required: false },
   started: { type: Date, required: false },

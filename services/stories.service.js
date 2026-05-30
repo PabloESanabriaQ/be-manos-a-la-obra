@@ -33,8 +33,23 @@ const getTasksByStory = async (id) => {
   return Task.find({ story: id, deletedAt: null });
 };
 
-const create = (body) => {
+const validateAssignedTo = async (assignedTo, epicId) => {
+  if (!assignedTo || assignedTo.length === 0) return;
+  const epic = await Epic.findById(epicId);
+  if (!epic) throw new NotFoundError('Epic not found');
+  const project = await Project.findById(epic.project);
+  if (!project) throw new NotFoundError('Project not found');
+  const memberIds = project.members.map((m) => m.user.toString());
+  for (const userId of assignedTo) {
+    if (!memberIds.includes(userId.toString())) {
+      throw new ValidationError(`User ${userId} is not a member of this project`);
+    }
+  }
+};
+
+const create = async (body) => {
   validateCreateStory(body);
+  if (body.assignedTo) await validateAssignedTo(body.assignedTo, body.epic);
   return new Story(body).save();
 };
 
@@ -45,6 +60,7 @@ const update = async (id, body) => {
   if (body.epic && story.epic.toString() !== body.epic.toString()) {
     throw new ValidationError('Cannot change the epic of a story');
   }
+  if (body.assignedTo) await validateAssignedTo(body.assignedTo, story.epic);
   return Story.findByIdAndUpdate(id, body, { new: true });
 };
 

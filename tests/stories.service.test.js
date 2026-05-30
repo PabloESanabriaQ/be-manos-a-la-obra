@@ -15,8 +15,23 @@ vi.mock('../models/tasks.model.js', () => {
   return { default: MockTask };
 });
 
+vi.mock('../models/epics.model.js', () => {
+  const MockEpic = vi.fn();
+  MockEpic.findById = vi.fn();
+  return { default: MockEpic };
+});
+
+vi.mock('../models/projects.model.js', () => {
+  const MockProject = vi.fn();
+  MockProject.find = vi.fn();
+  MockProject.findById = vi.fn();
+  return { default: MockProject };
+});
+
 import Story from '../models/stories.model.js';
 import Task from '../models/tasks.model.js';
+import Epic from '../models/epics.model.js';
+import Project from '../models/projects.model.js';
 import { getAll, getById, getTasksByStory, create, update } from '../services/stories.service.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
@@ -100,20 +115,57 @@ describe('StoriesService', () => {
       expect(result).toEqual(saved);
     });
 
-    it('lanza ValidationError si falta name', () => {
-      expect(() => create({ epic: 'epic-id' })).toThrow(ValidationError);
+    it('lanza ValidationError si falta name', async () => {
+      await expect(create({ epic: 'epic-id' })).rejects.toThrow(ValidationError);
     });
 
-    it('lanza ValidationError si falta epic', () => {
-      expect(() => create({ name: 'Story' })).toThrow(ValidationError);
+    it('lanza ValidationError si falta epic', async () => {
+      await expect(create({ name: 'Story' })).rejects.toThrow(ValidationError);
     });
 
-    it('lanza ValidationError si points está fuera de rango', () => {
-      expect(() => create({ name: 'Story', epic: 'epic-id', points: 6 })).toThrow(ValidationError);
+    it('lanza ValidationError si points no es un valor válido de poker planning', async () => {
+      await expect(create({ name: 'Story', epic: 'epic-id', points: 6 })).rejects.toThrow(ValidationError);
+      await expect(create({ name: 'Story', epic: 'epic-id', points: 4 })).rejects.toThrow(ValidationError);
     });
 
-    it('lanza ValidationError si status es inválido', () => {
-      expect(() => create({ name: 'Story', epic: 'epic-id', status: 'invalido' })).toThrow(ValidationError);
+    it('acepta todos los valores válidos de poker planning', async () => {
+      for (const points of [0, 1, 2, 3, 5, 8, 13, 21]) {
+        const input = { name: 'Story', epic: 'epic-id', points };
+        const saved = { _id: 'nuevo-id', ...input };
+        const mockInstance = { save: vi.fn().mockResolvedValue(saved) };
+        Story.mockImplementation(function() { return mockInstance; });
+        await expect(create(input)).resolves.toEqual(saved);
+      }
+    });
+
+    it('lanza ValidationError si un usuario asignado no es miembro del proyecto', async () => {
+      Epic.findById.mockResolvedValue({ _id: 'epic-id', project: 'project-id' });
+      Project.findById.mockResolvedValue({
+        _id: 'project-id',
+        members: [{ user: { toString: () => 'user-miembro' } }],
+      });
+
+      await expect(
+        create({ name: 'Story', epic: 'epic-id', assignedTo: ['user-no-miembro'] })
+      ).rejects.toThrow(ValidationError);
+    });
+
+    it('permite asignar usuarios que son miembros del proyecto', async () => {
+      Epic.findById.mockResolvedValue({ _id: 'epic-id', project: 'project-id' });
+      Project.findById.mockResolvedValue({
+        _id: 'project-id',
+        members: [{ user: { toString: () => 'user-miembro' } }],
+      });
+      const input = { name: 'Story', epic: 'epic-id', assignedTo: ['user-miembro'] };
+      const saved = { _id: 'nuevo-id', ...input };
+      const mockInstance = { save: vi.fn().mockResolvedValue(saved) };
+      Story.mockImplementation(function() { return mockInstance; });
+
+      await expect(create(input)).resolves.toEqual(saved);
+    });
+
+    it('lanza ValidationError si status es inválido', async () => {
+      await expect(create({ name: 'Story', epic: 'epic-id', status: 'invalido' })).rejects.toThrow(ValidationError);
     });
   });
 
@@ -154,8 +206,23 @@ describe('StoriesService', () => {
         .rejects.toThrow(ValidationError);
     });
 
-    it('lanza ValidationError si points está fuera de rango', async () => {
+    it('lanza ValidationError si points no es un valor válido de poker planning', async () => {
       await expect(update('1', { name: 'Story', points: -1 })).rejects.toThrow(ValidationError);
+      await expect(update('1', { name: 'Story', points: 4 })).rejects.toThrow(ValidationError);
+    });
+
+    it('lanza ValidationError si un usuario asignado no es miembro del proyecto', async () => {
+      const existing = { _id: '1', name: 'Story', epic: { toString: () => 'epic-id' } };
+      Story.findById.mockResolvedValue(existing);
+      Epic.findById.mockResolvedValue({ _id: 'epic-id', project: 'project-id' });
+      Project.findById.mockResolvedValue({
+        _id: 'project-id',
+        members: [{ user: { toString: () => 'user-miembro' } }],
+      });
+
+      await expect(
+        update('1', { name: 'Story', assignedTo: ['user-no-miembro'] })
+      ).rejects.toThrow(ValidationError);
     });
   });
 });
