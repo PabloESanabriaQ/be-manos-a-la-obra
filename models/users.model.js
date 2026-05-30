@@ -7,8 +7,8 @@ const usersSchema = new Schema({
   username: { type: String, required: true },
   password: { type: String, required: true },
   name: {
-    first: { type: String, required: false },
-    last: { type: String, required: false },
+    first: { type: String, required: true },
+    last: { type: String, required: true },
   },
   role: {
     type: String,
