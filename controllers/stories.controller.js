@@ -4,7 +4,8 @@ const getStories = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
-    const { data, total } = await storiesService.getAll(page, limit, req.userId);
+    const { assignedTo, status } = req.query;
+    const { data, total } = await storiesService.getAll(page, limit, req.userId, { assignedTo, status });
     res.status(200).json({ data, pagination: { page, limit, total } });
   } catch (err) {
     next(err);

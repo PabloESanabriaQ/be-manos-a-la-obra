@@ -6,7 +6,7 @@ import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 import { validateCreateStory, validateUpdateStory } from '../utils/validateStories.js';
 
-const getAll = async (page = 1, limit = 20, userId) => {
+const getAll = async (page = 1, limit = 20, userId, { assignedTo, status } = {}) => {
   const skip = (page - 1) * limit;
   const filter = { deletedAt: null };
   if (userId) {
@@ -14,6 +14,8 @@ const getAll = async (page = 1, limit = 20, userId) => {
     const epics = await Epic.find({ project: { $in: projects.map((p) => p._id) }, deletedAt: null }).select('_id');
     filter.epic = { $in: epics.map((e) => e._id) };
   }
+  if (assignedTo) filter.assignedTo = assignedTo;
+  if (status) filter.status = status;
   const [data, total] = await Promise.all([
     Story.find(filter).skip(skip).limit(limit),
     Story.countDocuments(filter),
@@ -22,7 +24,9 @@ const getAll = async (page = 1, limit = 20, userId) => {
 };
 
 const getById = async (id) => {
-  const story = await Story.findById(id);
+  const story = await Story.findById(id)
+    .populate('epic', 'project name')
+    .populate('assignedTo', 'username name');
   if (!story || story.deletedAt) throw new NotFoundError('Story not found');
   return story;
 };
@@ -61,7 +65,9 @@ const update = async (id, body) => {
     throw new ValidationError('Cannot change the epic of a story');
   }
   if (body.assignedTo) await validateAssignedTo(body.assignedTo, story.epic);
-  return Story.findByIdAndUpdate(id, body, { new: true });
+  return Story.findByIdAndUpdate(id, body, { new: true })
+    .populate('epic', 'project name')
+    .populate('assignedTo', 'username name');
 };
 
 const remove = async (id) => {

@@ -19,7 +19,7 @@ const getAll = async (page = 1, limit = 20, userId, userRole) => {
 };
 
 const getById = async (id) => {
-  const project = await Project.findById(id);
+  const project = await Project.findById(id).populate('members.user', 'username name');
   if (!project || project.deletedAt) throw new NotFoundError('Project not found');
   return project;
 };
