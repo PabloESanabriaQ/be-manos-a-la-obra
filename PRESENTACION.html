@@ -1,0 +1,886 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Manos a la Obra — Presentación del proyecto</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+
+  <style>
+    :root {
+      --brand: #385752;
+      --accent: #f9bc60;
+      --bg: #f7faf9;
+      --text: #1a1a1a;
+      --muted: #5b6b69;
+      --surface: #ffffff;
+      --border: #d8e2e0;
+    }
+
+    .reveal {
+      font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+      color: var(--text);
+    }
+    .reveal .slides { text-align: left; }
+
+    /* Todas las slides ocupan la altura completa del canvas, así el footer
+       queda en la misma posición visual en todas. */
+    .reveal .slides > section,
+    .reveal .slides > section > section {
+      min-height: 100% !important;
+      box-sizing: border-box;
+      display: flex !important;
+      flex-direction: column;
+      padding-bottom: 56px; /* aire para el footer + slide-number */
+    }
+
+    /* Cover y cierre: centro vertical y horizontal */
+    .reveal .slides > section.cover {
+      justify-content: center;
+      align-items: center;
+    }
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      color: var(--brand);
+      text-transform: none;
+      letter-spacing: -0.01em;
+      font-weight: 700;
+      margin-bottom: 0.3em;
+    }
+    .reveal h1 { font-size: 2.2em; }
+    .reveal h2 { font-size: 1.35em; margin-top: 0; }
+    .reveal h3 { font-size: 1em; }
+    .reveal p { font-size: 0.72em; line-height: 1.4; margin: 0.3em 0; }
+    .reveal li { font-size: 0.7em; line-height: 1.4; margin: 0.25em 0; }
+    .reveal ul, .reveal ol { margin: 0.3em 0; padding-left: 1.2em; }
+    .reveal a { color: var(--brand); }
+    .reveal strong { color: var(--brand); }
+    .reveal em { color: var(--muted); font-style: normal; }
+
+    .reveal code {
+      background: rgba(56,87,82,0.08);
+      padding: 0 0.3em;
+      border-radius: 3px;
+      font-size: 0.88em;
+    }
+    .reveal pre {
+      box-shadow: 0 6px 22px rgba(0,0,0,0.12);
+      border-radius: 8px;
+      width: 100%;
+      margin: 0.4em 0;
+    }
+    .reveal pre code {
+      background: #272822;
+      padding: 14px 16px;
+      max-height: 380px;
+      font-size: 0.52em;
+      line-height: 1.4;
+      overflow: auto;
+    }
+
+    .reveal table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.62em;
+      margin-top: 0.3em;
+    }
+    .reveal table th {
+      background: var(--brand);
+      color: #fff;
+      padding: 6px 10px;
+      text-align: left;
+    }
+    .reveal table td {
+      padding: 5px 10px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .reveal table tr:nth-child(even) td { background: #f1f6f5; }
+
+    .cover {
+      text-align: center !important;
+    }
+    .cover h1 {
+      font-size: 3em;
+      margin-bottom: 0.1em;
+    }
+    .cover .subtitle {
+      font-size: 1.25em;
+      color: var(--muted);
+      margin-bottom: 1.5em;
+    }
+    .cover .meta {
+      font-size: 0.8em;
+      color: var(--muted);
+      margin-top: 2em;
+    }
+    .cover .badges {
+      margin-top: 1em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 12px;
+      background: var(--brand);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 0.55em;
+      font-weight: 500;
+    }
+    .badge.accent { background: var(--accent); color: #1a1a1a; }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    .three-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--brand);
+      border-radius: 6px;
+      padding: 10px 14px;
+    }
+    .card h4 {
+      margin: 0 0 4px 0;
+      font-size: 0.78em;
+      color: var(--brand);
+    }
+    .card p, .card ul, .card li {
+      font-size: 0.6em !important;
+      line-height: 1.35;
+      margin: 0;
+      color: var(--text);
+    }
+    .card ul { padding-left: 1em; }
+    .card li { margin: 0.15em 0; }
+    .card.accent { border-left-color: var(--accent); }
+
+    /* Tipografías dentro de columnas (h3 + listas dentro de two-col) */
+    .two-col h3, .three-col h3 { font-size: 0.85em !important; margin-bottom: 0.25em; }
+    .two-col ul li, .three-col ul li { font-size: 0.66em; }
+    .two-col p, .three-col p { font-size: 0.66em; }
+
+    .reveal .slide-number {
+      background: rgba(56,87,82,0.85);
+      color: #fff;
+      font-size: 0.65em;
+    }
+    .footer {
+      position: absolute;
+      bottom: 14px;
+      left: 28px;
+      font-size: 0.55em;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .ascii {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
+      font-size: 0.48em;
+      line-height: 1.35;
+      background: #0d1e1c;
+      color: #c0e7e1;
+      padding: 14px 16px;
+      border-radius: 8px;
+      white-space: pre;
+      overflow-x: auto;
+      margin: 0.4em 0;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 9px;
+      background: rgba(56,87,82,0.12);
+      color: var(--brand);
+      border-radius: 4px;
+      font-size: 0.7em;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    .kbd {
+      font-family: "JetBrains Mono", monospace;
+      background: #ecf2f1;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 0.85em;
+      border-bottom: 2px solid #c8d6d3;
+    }
+
+    ul li { margin: 0.35em 0; }
+
+    .small { font-size: 0.75em; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ===== SLIDE 1: COVER ===== -->
+      <section class="cover">
+        <h1>Gestor de Proyectos</h1>
+        <p class="subtitle">Gestión jerárquica de proyectos ágiles</p>
+        <div class="badges">
+          <span class="badge">Node.js · Express</span>
+          <span class="badge">MongoDB · Mongoose</span>
+          <span class="badge">React · Vite</span>
+          <span class="badge accent">JWT + Refresh tokens</span>
+          <span class="badge accent">Swagger / OpenAPI</span>
+        </div>
+        <p class="meta">Backend REST + SPA en React · Pablo Sanabria</p>
+      </section>
+
+      <!-- ===== SLIDE 2: ¿QUÉ ES? ===== -->
+      <section>
+        <h2>¿Qué es Gestor de Proyectos?</h2>
+        <p>Una aplicación web para gestionar proyectos siguiendo una jerarquía
+          inspirada en metodologías ágiles, con tres roles y permisos
+          diferenciados.</p>
+        <div class="ascii">Proyecto
+   └─ Épica
+        └─ Historia de Usuario
+             └─ Tarea</div>
+        <p class="small">Cada nivel tiene CRUD completo. Las historias soportan
+          estimación con <strong>story points Fibonacci</strong> (planning póker),
+          asignación de responsables y filtrado por estado.</p>
+        <div class="footer">01 · Visión general</div>
+      </section>
+
+      <!-- ===== SLIDE 3: ARQUITECTURA ===== -->
+      <section>
+        <h2>Arquitectura del sistema</h2>
+        <div class="ascii">┌──────────────────────────┐         ┌──────────────────────────┐
+│   Frontend SPA (React)   │  HTTPS  │   Backend API REST       │
+│   Vite + React Router    │ ◄─────► │   Express + Mongoose     │
+│   localStorage (user)    │ cookies │   JWT + Refresh Tokens   │
+└──────────────────────────┘         └────────────┬─────────────┘
+                                                  │
+                                                  ▼
+                                          ┌───────────────┐
+                                          │   MongoDB     │
+                                          └───────────────┘</div>
+        <ul>
+          <li>Comunicación con <code>credentials: "include"</code> (cookies HTTP-only).</li>
+          <li>Tokens transparentes al JS del navegador → mitiga XSS.</li>
+          <li>Refresh automático al recibir <strong>401</strong> (un reintento).</li>
+        </ul>
+        <div class="footer">02 · Arquitectura</div>
+      </section>
+
+      <!-- ===== SLIDE 4: ROLES ===== -->
+      <section>
+        <h2>Roles y permisos</h2>
+        <table>
+          <thead>
+            <tr><th>Rol</th><th>Alcance</th><th>Capacidades clave</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>admin_users</code></td>
+              <td>Global</td>
+              <td>Crea/edita/desactiva usuarios y asigna miembros a proyectos.</td>
+            </tr>
+            <tr>
+              <td><code>admin_projects</code></td>
+              <td>Por proyecto</td>
+              <td>Control total dentro de sus proyectos (épicas, historias, tareas).</td>
+            </tr>
+            <tr>
+              <td><code>member</code></td>
+              <td>Por proyecto</td>
+              <td>Operación cotidiana: historias y tareas. Solo lectura/edición parcial sobre proyecto y épicas.</td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:1em;"><strong>Decisión clave:</strong> el
+          rol del usuario en un proyecto puede diferir de su rol global. La
+          autorización por recurso usa el rol del array <code>members</code>.</p>
+        <div class="footer">03 · Modelo de roles</div>
+      </section>
+
+      <!-- ===== SLIDE 5: BACKEND STACK ===== -->
+      <section>
+        <h2>Backend — Stack tecnológico</h2>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <h4>Núcleo</h4>
+              <ul>
+                <li>Node.js (ES Modules)</li>
+                <li>Express ^4.21</li>
+                <li>Mongoose ^8.8 · MongoDB</li>
+              </ul>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <h4>Seguridad</h4>
+              <ul>
+                <li>jsonwebtoken ^9.0</li>
+                <li>bcryptjs (10 rounds)</li>
+                <li>cookie-parser · cors · express-rate-limit</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <div class="card accent">
+              <h4>Observabilidad y docs</h4>
+              <ul>
+                <li>pino + pino-http + pino-pretty</li>
+                <li>swagger-jsdoc + swagger-ui-express</li>
+              </ul>
+            </div>
+            <div class="card accent" style="margin-top:12px;">
+              <h4>Tooling</h4>
+              <ul>
+                <li>Vitest (tests unitarios)</li>
+                <li>ESLint 10 · nodemon · dotenv</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="footer">04 · Backend</div>
+      </section>
+
+      <!-- ===== SLIDE 6: ESTRUCTURA BACKEND ===== -->
+      <section>
+        <h2>Backend — Estructura por capas</h2>
+        <div class="two-col">
+          <div>
+            <div class="ascii">be-manos-a-la-obra/
+├── app.js
+├── config/         logger · swagger
+├── db/             conexión Mongo
+├── models/         esquemas Mongoose
+├── controllers/    parse req/res
+├── services/       lógica de negocio
+├── routes/         endpoints + JSDoc
+├── middlewares/    auth · roles · errors
+├── errors/         clases custom
+├── utils/          validadores
+├── scripts/seed.js
+└── tests/</div>
+          </div>
+          <div>
+            <h3 style="font-size:1em;">Flujo de una request</h3>
+            <ol style="font-size:0.78em;">
+              <li><strong>Route</strong> declara endpoint + middlewares.</li>
+              <li><strong>Middlewares</strong> autentican y autorizan.</li>
+              <li><strong>Controller</strong> llama al servicio.</li>
+              <li><strong>Service</strong> valida reglas y usa modelos.</li>
+              <li><strong>Model</strong> persiste en MongoDB.</li>
+              <li><strong>errorHandler</strong> serializa errores.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="footer">05 · Arquitectura interna</div>
+      </section>
+
+      <!-- ===== SLIDE 7: MODELOS ===== -->
+      <section>
+        <h2>Modelos de datos</h2>
+        <div class="three-col">
+          <div class="card"><h4>User</h4><p>email, username, password (bcrypt), name, role, active.</p></div>
+          <div class="card"><h4>Project</h4><p>name, description, icon, members[{user, role}], deletedAt.</p></div>
+          <div class="card"><h4>Epic</h4><p>project (ref), name, description, icon, deletedAt.</p></div>
+          <div class="card"><h4>Story</h4><p>epic (ref), owner, assignedTo[], points ∈ Fibonacci, status, fechas, deletedAt.</p></div>
+          <div class="card"><h4>Task</h4><p>story (ref), name, description, status, done, dueDate, deletedAt.</p></div>
+          <div class="card accent"><h4>RefreshToken</h4><p>token (hex 64), user, expiresAt, createdAt. Rotación al refrescar.</p></div>
+        </div>
+        <p class="small" style="margin-top:1em;">
+          <span class="pill">Soft delete</span>
+          <span class="pill">Cascada en remove()</span>
+          <span class="pill">No se mueven recursos entre padres</span>
+        </p>
+        <div class="footer">06 · Modelos</div>
+      </section>
+
+      <!-- ===== SLIDE 8: ENDPOINTS ===== -->
+      <section>
+        <h2>Endpoints de la API</h2>
+        <table>
+          <thead>
+            <tr><th>Recurso</th><th>Ruta base</th><th>Operaciones</th><th>Auth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Auth</td><td><code>/api/login</code> · <code>/logout</code> · <code>/auth/refresh</code></td><td>POST · POST · POST</td><td>Pública (rate-limited)</td></tr>
+            <tr><td>Users</td><td><code>/api/users</code></td><td>CRUD + <code>/me</code> + <code>/deactivate</code></td><td><code>admin_users</code></td></tr>
+            <tr><td>Projects</td><td><code>/api/projects</code></td><td>CRUD + <code>/epics</code> + <code>/members</code></td><td>Membresía</td></tr>
+            <tr><td>Epics</td><td><code>/api/epics</code></td><td>CRUD + <code>/stories</code></td><td>Membresía</td></tr>
+            <tr><td>Stories</td><td><code>/api/stories</code></td><td>CRUD + filtros <code>assignedTo</code>, <code>status</code></td><td>Membresía</td></tr>
+            <tr><td>Tasks</td><td><code>/api/tasks</code></td><td>CRUD</td><td>Membresía</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:0.8em;">
+          Respuestas estandarizadas: <code>{ data, pagination }</code> en listados ·
+          <code>{ error, name, message }</code> en errores. Paginación default
+          <code>page=1, limit=20</code>.
+        </p>
+        <div class="footer">07 · API</div>
+      </section>
+
+      <!-- ===== SLIDE 9: AUTH ===== -->
+      <section>
+        <h2>Autenticación: JWT + refresh tokens</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;">Cookies HTTP-only</h3>
+            <ul style="font-size:0.78em;">
+              <li><code>token</code> — JWT firmado, 15 minutos.</li>
+              <li><code>refreshToken</code> — 64 bytes aleatorios, 7 días, persistido en BD.</li>
+              <li>En producción: <code>Secure</code> + <code>SameSite=none</code>.</li>
+              <li>Inaccesibles desde JS → mitiga XSS.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">Rotación</h3>
+            <ul style="font-size:0.78em;">
+              <li>Cada <code>/auth/refresh</code> elimina el viejo y emite uno nuevo.</li>
+              <li><code>/logout</code> elimina el refresh token del usuario.</li>
+              <li>Rate limit: <strong>10 intentos / 15 min</strong> en login.</li>
+            </ul>
+          </div>
+        </div>
+        <pre><code class="language-js">// middlewares/authentication.js — verificación por request
+const decoded = jwt.verify(token, JWT_SECRET);
+const user = await User.findById(decoded.id, 'role active');
+if (!user)          return res.status(401).end();
+if (!user.active)   return res.status(403).end(); // cuenta desactivada
+req.userId   = decoded.id;
+req.userRole = user.role;</code></pre>
+        <div class="footer">08 · Auth</div>
+      </section>
+
+      <!-- ===== SLIDE 10: AUTORIZACIÓN ===== -->
+      <section>
+        <h2>Autorización en dos niveles</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;">1. Rol global</h3>
+            <p class="small"><code>requireRole(...roles)</code> · controla acciones
+              transversales (gestionar usuarios, crear proyectos).</p>
+            <pre><code class="language-js">router.post(
+  '/',
+  authMiddleware,
+  requireRole('admin_users'),
+  createProject
+);</code></pre>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">2. Permiso en el proyecto</h3>
+            <p class="small"><code>requireProjectAccess(resource, action)</code> ·
+              matriz por rol dentro del proyecto.</p>
+            <table>
+              <thead><tr><th></th><th>admin_projects</th><th>member</th></tr></thead>
+              <tbody>
+                <tr><td>project:*</td><td>✅</td><td>solo read</td></tr>
+                <tr><td>epic:*</td><td>✅</td><td>read + edit</td></tr>
+                <tr><td>story:*</td><td>✅</td><td>✅</td></tr>
+                <tr><td>task:*</td><td>✅</td><td>✅</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="small" style="margin-top:1em;">
+          <code>resolveProjectId</code> navega
+          <em>task → story → epic → project</em> para resolver el contexto en
+          rutas anidadas antes del chequeo de permisos.
+        </p>
+        <div class="footer">09 · Autorización</div>
+      </section>
+
+      <!-- ===== SLIDE 11: ERRORES Y VALIDACIONES ===== -->
+      <section>
+        <h2>Errores y validaciones</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;">Clases custom (<code>errors/</code>)</h3>
+            <table>
+              <thead><tr><th>Clase</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>NotFoundError</td><td>404</td></tr>
+                <tr><td>ValidationError</td><td>400</td></tr>
+                <tr><td>InvalidCredentialsError</td><td>400</td></tr>
+                <tr><td>ForbiddenError</td><td>403</td></tr>
+                <tr><td>UsernameAlreadyExistsError</td><td>400</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">errorHandler centralizado</h3>
+            <pre><code class="language-js">errorHandler = (err, req, res, _next) => {
+  const status = err.status || 500;
+  status >= 500
+    ? logger.error({ err }, err.message)
+    : logger.warn ({ err }, err.message);
+  res.status(status).json({
+    error: true,
+    name: err.name,
+    message: err.message,
+  });
+};</code></pre>
+          </div>
+        </div>
+        <p class="small"><strong>Validadores por recurso</strong> en <code>utils/</code>:
+          <code>validateCreateStory</code>, <code>validateUpdateTask</code>, etc.
+          Sin Joi/Zod, manteniendo dependencias livianas.</p>
+        <div class="footer">10 · Errores</div>
+      </section>
+
+      <!-- ===== SLIDE 12: LOGGING, SEED, SWAGGER ===== -->
+      <section>
+        <h2>Logging, seed y Swagger</h2>
+        <div class="three-col">
+          <div class="card">
+            <h4>Pino logger</h4>
+            <p>JSON estructurado en producción. <code>pino-pretty</code> en desarrollo. <code>pino-http</code> registra cada request.</p>
+          </div>
+          <div class="card">
+            <h4>Seed reproducible</h4>
+            <p><code>npm run seed</code>: 4 usuarios (admin, pm, dev1, dev2), 2 proyectos, 4 épicas, 12 historias, 24 tareas con estados y puntos Fibonacci.</p>
+          </div>
+          <div class="card accent">
+            <h4>Swagger UI</h4>
+            <p><code>/api-docs</code>. OpenAPI 3.0 vía <code>swagger-jsdoc</code> + <code>cookieAuth</code> security scheme.</p>
+          </div>
+        </div>
+        <pre style="margin-top:1em;"><code class="language-bash"># Credenciales de prueba (seed)
+admin / admin123     → admin_users
+pm    / pm123        → admin_projects
+dev1  / dev1123      → member
+dev2  / dev2123      → member</code></pre>
+        <div class="footer">11 · Operación</div>
+      </section>
+
+      <!-- ===== SLIDE 13: FRONTEND STACK ===== -->
+      <section>
+        <h2>Frontend — Stack tecnológico</h2>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <h4>UI y build</h4>
+              <ul>
+                <li>React 18.3 + React DOM</li>
+                <li>Vite 5.4</li>
+                <li>React Router DOM 6.26</li>
+              </ul>
+            </div>
+            <div class="card" style="margin-top:12px;">
+              <h4>Estilos</h4>
+              <ul>
+                <li>SCSS Modules (co-localizados)</li>
+                <li>CSS custom properties (tema light/dark)</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <div class="card accent">
+              <h4>i18n y estado</h4>
+              <ul>
+                <li>react-i18next (es/en)</li>
+                <li>Context API nativa (UserContext)</li>
+              </ul>
+            </div>
+            <div class="card accent" style="margin-top:12px;">
+              <h4>Calidad y testing</h4>
+              <ul>
+                <li>ESLint 9 flat + Prettier 3</li>
+                <li>Husky + lint-staged</li>
+                <li>Vitest + React Testing Library</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="footer">12 · Frontend</div>
+      </section>
+
+      <!-- ===== SLIDE 14a: RUTAS Y VISTAS — TOP-LEVEL ===== -->
+      <section>
+        <h2>Routing y vistas <span style="font-size:0.55em; color: var(--muted);">— acceso y top-level</span></h2>
+        <table>
+          <thead>
+            <tr><th>Ruta</th><th>Vista</th><th>Rol permitido</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/login</code></td><td>LoginView</td><td>no autenticado</td></tr>
+            <tr><td><code>/home</code></td><td>HomeView (dual: admin / lista de proyectos)</td><td>cualquiera</td></tr>
+            <tr><td><code>/my-projects</code></td><td>MyProjectsView</td><td>admin_projects, member</td></tr>
+            <tr><td><code>/my-stories</code></td><td>MyStoriesView (filtros por status / assignedTo)</td><td>admin_projects, member</td></tr>
+            <tr><td><code>/profile</code></td><td>ProfileView</td><td>autenticado</td></tr>
+            <tr><td><code>/settings</code></td><td>SettingsView (idioma, tema, contraseña)</td><td>autenticado</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:0.8em;"><code>ProtectedRoute</code>
+          redirige a <code>homeRoute()</code> si el rol del usuario no está
+          en <code>allowedRoles</code>.</p>
+        <div class="footer">13 · Vistas top-level</div>
+      </section>
+
+      <!-- ===== SLIDE 14b: RUTAS ANIDADAS ===== -->
+      <section>
+        <h2>Routing y vistas <span style="font-size:0.55em; color: var(--muted);">— navegación jerárquica</span></h2>
+        <table>
+          <thead>
+            <tr><th>Ruta</th><th>Vista</th><th>Operaciones</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>/project/:idProyecto</code></td><td>ProjectView</td><td>CRUD de épicas · editar proyecto</td></tr>
+            <tr><td><code>/epic/:idEpica</code></td><td>EpicView</td><td>CRUD de historias · editar épica</td></tr>
+            <tr><td><code>/userStory/:idHistoriaDeUsuario</code></td><td>UserStoryView</td><td>CRUD de tareas · asignar usuarios · status</td></tr>
+            <tr><td><code>/task/:Tarea</code></td><td>TaskView</td><td>Editar tarea · marcar como done · eliminar</td></tr>
+          </tbody>
+        </table>
+        <p class="small" style="margin-top:0.8em;">
+          Todas estas rutas requieren rol <code>admin_projects</code> o
+          <code>member</code>. La navegación reproduce la jerarquía del
+          dominio: <em>Proyecto → Épica → Historia → Tarea</em>.
+        </p>
+        <p class="small">
+          Las acciones disponibles dentro de cada vista se renderizan
+          condicionalmente con <code>canDo("epic:create")</code>,
+          <code>canDo("story:delete")</code>, etc.
+        </p>
+        <div class="footer">14 · Vistas anidadas</div>
+      </section>
+
+      <!-- ===== SLIDE 15: ESTADO GLOBAL ===== -->
+      <section>
+        <h2>Estado global: <code>UserContext</code></h2>
+        <pre><code class="language-jsx" style="font-size: 0.52em; max-height: 320px;">// context/UserContext.jsx
+const PERMISSIONS = {
+  admin_projects: new Set([
+    'project:read','project:edit','project:delete',
+    'epic:*','story:*','task:*',
+  ]),
+  member: new Set([
+    'project:read','epic:read','epic:edit',
+    'story:*','task:*',
+  ]),
+};
+
+function canDo(permission) {
+  return PERMISSIONS[user?.role]?.has(permission);
+}</code></pre>
+        <ul style="margin-top:0.4em; font-size: 0.7em;">
+          <li><code>user</code> rehidratado desde <code>localStorage</code> al arrancar.</li>
+          <li>Las vistas usan <code>canDo("epic:create")</code> para renderizar botones/forms condicionalmente.</li>
+          <li>El JWT vive en cookies — el frontend nunca lo toca.</li>
+        </ul>
+        <div class="footer">15 · Estado global</div>
+      </section>
+
+      <!-- ===== SLIDE 16: CLIENTE HTTP (orig 15) ===== -->
+      <section>
+        <h2>Cliente HTTP y patrón de servicios</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;"><code>apiFetch()</code></h3>
+            <ul style="font-size:0.78em;">
+              <li>Prefija <code>VITE_API_URL</code>.</li>
+              <li><code>credentials: "include"</code> siempre.</li>
+              <li>En <strong>401</strong>: intenta <code>/auth/refresh</code> y reintenta una vez.</li>
+              <li>Si falla: limpia <code>localStorage</code> y redirige a <code>/</code>.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">Convención</h3>
+            <ul style="font-size:0.78em;">
+              <li><strong>GET</strong> → custom hook <code>{ data, loading, error }</code>.</li>
+              <li><strong>Mutaciones</strong> → función <code>async</code> que lanza errores.</li>
+            </ul>
+          </div>
+        </div>
+        <pre><code class="language-jsx">// services/getAllProjects.js
+export default function useAllProjects() {
+  const [data, setData]       = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError]     = useState(null);
+  useEffect(() => {
+    apiFetch("/projects")
+      .then(({ data }) => setData(data))
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, []);
+  return { data, loading, error };
+}</code></pre>
+        <div class="footer">16 · Servicios</div>
+      </section>
+
+      <!-- ===== SLIDE 17: ESTILOS + I18N ===== -->
+      <section>
+        <h2>Estilos, tema e i18n</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;">SCSS Modules + variables CSS</h3>
+            <ul style="font-size:0.78em;">
+              <li>Cada componente: <code>styles.module.scss</code> co-localizado.</li>
+              <li>Paleta en <code>:root</code> + override con <code>[data-theme="dark"]</code>.</li>
+              <li><code>useTheme()</code> persiste en <code>localStorage</code>.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">Internacionalización</h3>
+            <ul style="font-size:0.78em;">
+              <li><code>react-i18next</code> con español (default) e inglés.</li>
+              <li>Claves agrupadas: <code>nav.*</code>, <code>crud.*</code>, <code>admin.*</code>…</li>
+              <li>Regla: <strong>nunca strings hardcodeados</strong> en UI.</li>
+            </ul>
+          </div>
+        </div>
+        <pre><code class="language-scss">// styles/theme.scss
+:root {
+  --color-bg: #f0f8ff;
+  --color-brand: #385752;
+  --color-accent: #f9bc60;
+}
+[data-theme="dark"] {
+  --color-bg: #0d1e1c;
+  --color-brand: #7bbdb4;
+  color-scheme: dark;
+}</code></pre>
+        <div class="footer">17 · Estilos / i18n</div>
+      </section>
+
+      <!-- ===== SLIDE 18: TESTING ===== -->
+      <section>
+        <h2>Testing</h2>
+        <div class="two-col">
+          <div class="card">
+            <h4>Backend — Vitest</h4>
+            <ul>
+              <li>6 archivos en <code>tests/*.service.test.js</code>.</li>
+              <li>Modelos Mongoose <strong>mockeados</strong> con <code>vi.mock</code>.</li>
+              <li>Sin necesidad de levantar MongoDB para correr la suite.</li>
+              <li>Comando: <code>npm test</code> / <code>npm run test:watch</code>.</li>
+            </ul>
+          </div>
+          <div class="card accent">
+            <h4>Frontend — Vitest + RTL</h4>
+            <ul>
+              <li>Setup mockea <code>i18n</code>, <code>localStorage</code> y <code>matchMedia</code>.</li>
+              <li>Cubre servicios, hooks, <code>PaginationComponent</code>, <code>LoginView</code>.</li>
+              <li>jsdom como entorno.</li>
+              <li>Comando: <code>npm test</code> / <code>npm run test:run</code>.</li>
+            </ul>
+          </div>
+        </div>
+        <p class="small" style="margin-top:1em;"><strong>Limitación conocida:</strong>
+          no hay tests de integración HTTP en el backend ni tests para
+          <code>AdminUsersPanel</code> / <code>ProtectedRoute</code> en el frontend.</p>
+        <div class="footer">18 · Testing</div>
+      </section>
+
+      <!-- ===== SLIDE 19: CALIDAD ===== -->
+      <section>
+        <h2>Calidad de código y flujo</h2>
+        <div class="three-col">
+          <div class="card">
+            <h4>Linting</h4>
+            <p>ESLint en ambos repos. Frontend con flat config + plugins de React y hooks. Backend con globals de Node.</p>
+          </div>
+          <div class="card">
+            <h4>Formato</h4>
+            <p>Prettier 3 (semi, double quotes, 2 spaces, printWidth 100). Integrado vía <code>eslint-config-prettier</code>.</p>
+          </div>
+          <div class="card accent">
+            <h4>Git hooks</h4>
+            <p><code>husky</code> + <code>lint-staged</code> en pre-commit: <code>eslint --fix</code> + <code>prettier --write</code>.</p>
+          </div>
+        </div>
+        <h3 style="margin-top:1em; font-size:1em;">Convenciones del equipo (frontend)</h3>
+        <ul style="font-size:0.78em;">
+          <li>Componentes en <code>ComponentName/index.jsx</code> con <code>export default</code>.</li>
+          <li>SCSS Modules co-localizados.</li>
+          <li><code>prop-types</code> obligatorio en todos los componentes.</li>
+          <li>Servicios GET como hooks · mutaciones como <code>async</code>.</li>
+          <li>i18n obligatorio para strings visibles.</li>
+        </ul>
+        <div class="footer">19 · Calidad</div>
+      </section>
+
+      <!-- ===== SLIDE 20a: DECISIONES — SEGURIDAD Y DOMINIO ===== -->
+      <section>
+        <h2>Decisiones de diseño <span style="font-size:0.55em; color: var(--muted);">— seguridad y dominio</span></h2>
+        <ul style="font-size: 0.72em; line-height: 1.5;">
+          <li><strong>Permisos en dos niveles</strong> — un rol global
+            (<code>admin_users</code>) separado del rol que cada usuario tiene
+            <em>dentro</em> de cada proyecto. Aísla la administración del
+            sistema de la operación cotidiana.</li>
+          <li><strong>Cookies HTTP-only para JWT</strong> — el frontend nunca
+            toca el token (mitiga XSS). La "sesión lógica" se infiere de
+            <code>localStorage.user</code>.</li>
+          <li><strong>Refresh token rotativo</strong> — cada uso emite uno
+            nuevo y elimina el viejo, acotando la ventana de un token robado.</li>
+          <li><strong>Soft delete en cascada</strong> implementado en servicios
+            (no en hooks de Mongoose) — control explícito sobre el orden y
+            testeable sin levantar la base de datos.</li>
+        </ul>
+        <div class="footer">20 · Decisiones I</div>
+      </section>
+
+      <!-- ===== SLIDE 20b: DECISIONES — DX Y PRODUCTO ===== -->
+      <section>
+        <h2>Decisiones de diseño <span style="font-size:0.55em; color: var(--muted);">— DX y producto</span></h2>
+        <ul style="font-size: 0.72em; line-height: 1.5;">
+          <li><strong>Servicios GET como hooks</strong> con firma
+            <code>{ data, loading, error }</code> — estandariza la lectura
+            asincrónica y elimina boilerplate repetido en cada vista.</li>
+          <li><strong>Mutaciones como funciones <code>async</code></strong> que
+            lanzan errores — el llamador decide cómo mostrarlos
+            (<code>ErrorToast</code>, redirección, etc.).</li>
+          <li><strong>Sin Joi/Zod</strong> ni librerías pesadas de auth —
+            validadores propios en <code>utils/</code>, dependencias livianas
+            y transparencia pedagógica.</li>
+          <li><strong>i18n y dark mode</strong> de primera clase desde el
+            inicio, no añadidos tardíamente. Cada string visible pasa por
+            <code>t("clave")</code>; el tema usa CSS custom properties
+            intercambiables vía <code>data-theme</code>.</li>
+        </ul>
+        <div class="footer">21 · Decisiones II</div>
+      </section>
+
+      <!-- ===== SLIDE 21: CIERRE ===== -->
+      <section class="cover">
+        <h1>¡Gracias!</h1>
+        <p class="subtitle">Manos a la Obra · Repaso integral del proyecto</p>
+        <div style="margin-top:1.5em; font-size:0.8em; color: var(--muted);">
+          <p>📚 <code>DOCUMENTACION.md</code> — repaso textual completo</p>
+          <p>📖 <code>http://localhost:3000/api-docs</code> — Swagger UI interactivo</p>
+          <p>🌱 <code>npm run seed</code> — datos reproducibles para probar</p>
+        </div>
+        <p class="meta">¿Preguntas?</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      slideNumber: 'c/t',
+      controls: true,
+      progress: true,
+      center: false,            // sin centrado vertical: footer queda alineado en todas
+      transition: 'slide',
+      transitionSpeed: 'default',
+      width: 1280,
+      height: 800,
+      margin: 0.06,
+      plugins: [ RevealHighlight, RevealNotes ],
+    });
+  </script>
+</body>
+</html>
