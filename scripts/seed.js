@@ -84,24 +84,133 @@ async function seed() {
   ]);
   console.log('✓ Épicas creadas (4)');
 
+  // Proyecto Alpha: miembros pm y dev1
+  // Proyecto Beta:  miembros pm y dev2
   const stories = await Story.insertMany([
-    { name: 'Registro de usuario', epic: epic1._id },
-    { name: 'Login con email y contraseña', epic: epic1._id },
-    { name: 'Listar productos', epic: epic2._id },
-    { name: 'Agregar producto', epic: epic2._id },
-    { name: 'Agregar ítem al carrito', epic: epic3._id },
-    { name: 'Ver resumen del carrito', epic: epic3._id },
-    { name: 'Pago con tarjeta', epic: epic4._id },
-    { name: 'Confirmación de pago', epic: epic4._id },
+    // epic1 — Autenticación (Alpha)
+    {
+      name: 'Registro de usuario',
+      description: 'Formulario de registro con validación de email y contraseña',
+      epic: epic1._id,
+      assignedTo: [dev1._id],
+      points: 5,
+      status: 'done',
+      started: new Date('2026-01-10'),
+      finished: new Date('2026-01-15'),
+    },
+    {
+      name: 'Login con email y contraseña',
+      description: 'Autenticación JWT con refresh token',
+      epic: epic1._id,
+      assignedTo: [dev1._id],
+      points: 3,
+      status: 'done',
+      started: new Date('2026-01-16'),
+      finished: new Date('2026-01-19'),
+    },
+    {
+      name: 'Recuperación de contraseña',
+      description: 'Envío de email con enlace temporal para resetear contraseña',
+      epic: epic1._id,
+      assignedTo: [dev1._id, pm._id],
+      points: 5,
+      status: 'running',
+      started: new Date('2026-01-20'),
+    },
+
+    // epic2 — Catálogo de productos (Alpha)
+    {
+      name: 'Listar productos',
+      description: 'Endpoint paginado con filtros por categoría y precio',
+      epic: epic2._id,
+      assignedTo: [dev1._id],
+      points: 3,
+      status: 'running',
+      started: new Date('2026-01-22'),
+    },
+    {
+      name: 'Agregar producto',
+      description: 'CRUD completo de productos con carga de imágenes',
+      epic: epic2._id,
+      assignedTo: [],
+      points: 8,
+      status: 'todo',
+    },
+    {
+      name: 'Editar y eliminar producto',
+      description: 'Actualización parcial y borrado lógico',
+      epic: epic2._id,
+      assignedTo: [],
+      points: 5,
+      status: 'todo',
+    },
+
+    // epic3 — Carrito de compras (Beta)
+    {
+      name: 'Agregar ítem al carrito',
+      description: 'Agregar productos al carrito con control de stock',
+      epic: epic3._id,
+      assignedTo: [dev2._id],
+      points: 3,
+      status: 'done',
+      started: new Date('2026-01-12'),
+      finished: new Date('2026-01-16'),
+    },
+    {
+      name: 'Ver resumen del carrito',
+      description: 'Vista con ítems, cantidades, subtotales y total',
+      epic: epic3._id,
+      assignedTo: [dev2._id],
+      points: 2,
+      status: 'done',
+      started: new Date('2026-01-17'),
+      finished: new Date('2026-01-18'),
+    },
+    {
+      name: 'Eliminar ítem del carrito',
+      description: 'Quitar productos o reducir cantidad',
+      epic: epic3._id,
+      assignedTo: [dev2._id, pm._id],
+      points: 2,
+      status: 'running',
+      started: new Date('2026-01-21'),
+    },
+
+    // epic4 — Pasarela de pagos (Beta)
+    {
+      name: 'Pago con tarjeta',
+      description: 'Integración con Stripe para cobros con tarjeta de crédito/débito',
+      epic: epic4._id,
+      assignedTo: [dev2._id],
+      points: 13,
+      status: 'running',
+      started: new Date('2026-01-23'),
+    },
+    {
+      name: 'Confirmación de pago',
+      description: 'Webhook de Stripe y email de confirmación al comprador',
+      epic: epic4._id,
+      assignedTo: [],
+      points: 8,
+      status: 'todo',
+    },
+    {
+      name: 'Historial de transacciones',
+      description: 'Listado de pagos con estado y monto para el usuario',
+      epic: epic4._id,
+      assignedTo: [],
+      points: 5,
+      status: 'todo',
+    },
   ]);
-  console.log('✓ Historias creadas (8)');
+  console.log('✓ Historias creadas (12)');
 
   const tasks = stories.flatMap((story) => [
     { name: `Diseño UI — ${story.name}`, story: story._id },
     { name: `Implementación — ${story.name}`, story: story._id },
   ]);
   await Task.insertMany(tasks);
-  console.log('✓ Tareas creadas (16)');
+  console.log('✓ Tareas creadas (24)');
 
   await mongoose.disconnect();
 
@@ -113,6 +222,11 @@ Credenciales:
   pm    / pm123      → admin_projects → Proyecto Alpha, Proyecto Beta
   dev1  / dev1123    → member         → Proyecto Alpha
   dev2  / dev2123    → member         → Proyecto Beta
+
+Historias por estado:
+  done    → Registro de usuario, Login, Agregar ítem al carrito, Ver resumen del carrito
+  running → Recuperación de contraseña, Listar productos, Eliminar ítem del carrito, Pago con tarjeta
+  todo    → Agregar producto, Editar/eliminar producto, Confirmación de pago, Historial de transacciones
 `);
 }
 
