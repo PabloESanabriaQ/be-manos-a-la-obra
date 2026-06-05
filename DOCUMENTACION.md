@@ -313,12 +313,18 @@ sesión válida (cookie `token`).
 | Método | Ruta | Autorización |
 |--------|------|--------------|
 | GET | `/api/projects` | autenticado (filtra por membresía si no es `admin_users`) |
-| POST | `/api/projects` | `admin_users` |
+| POST | `/api/projects` | `admin_users` (body requiere `adminId`) |
 | GET | `/api/projects/:_id` | `project:read` |
 | PUT / PATCH | `/api/projects/:_id` | `project:edit` |
 | DELETE | `/api/projects/:_id` | `project:delete` |
 | GET | `/api/projects/:_id/epics` | `epic:read` |
 | PUT | `/api/projects/:_id/members` | `admin_users` |
+
+> El POST de proyectos requiere `{ name, adminId }`. El `adminId` es el usuario que
+> queda inicializado como `admin_projects` dentro del proyecto. Se valida que exista
+> y esté activo; cualquier `members` que venga en el body se ignora (la gestión
+> posterior pasa por `PUT /:_id/members`). Documentado en el schema
+> `ProjectCreateInput` de Swagger.
 
 #### Épicas (`/api/epics`)
 
@@ -359,8 +365,10 @@ vista del miembro (sus historias) como la del PM (filtrado por estado).
 
 - Éxito en listados: `{ data: [...], pagination: { page, limit, total } }`.
 - Éxito en operaciones simples: `{ message: '...' }` o el recurso devuelto.
-- Error: `{ error: true, name: 'NotFoundError', message: '...' }` con status
-  HTTP correspondiente.
+- Error: `{ error: true, name, message }` con status HTTP correspondiente.
+  Cuando aplica, el body suma `code` (handle estable, ej. `INVALID_POINTS`) y
+  `params` (objeto con valores para interpolación). Esto permite al frontend
+  traducir el mensaje según el idioma del usuario.
 - Paginación default: `page=1`, `limit=20` (máximo 100).
 
 ### 3.5 Autenticación y autorización
@@ -454,11 +462,32 @@ errorHandler = (err, req, res, _next) => {
   const status = err.status || 500;
   if (status >= 500) logger.error({ err }, err.message);
   else               logger.warn ({ err }, err.message);
-  res.status(status).json({ error: true, name: err.name, message: err.message });
+
+  const body = { error: true, name: err.name, message: err.message };
+  if (err.code)   body.code = err.code;
+  if (err.params) body.params = err.params;
+  res.status(status).json(body);
 };
 ```
 
-Registrado al final de la cadena en `app.js:104`.
+Registrado al final de la cadena en `app.js`.
+
+#### Códigos de error para i18n del cliente
+
+`ValidationError` acepta un segundo argumento opcional `{ code, params }` que
+el `errorHandler` propaga al body de la respuesta. Esto deja al backend
+generar un mensaje por default en inglés y al frontend traducirlo según el
+idioma del usuario.
+
+```js
+throw new ValidationError(
+  `Points must be one of: ${VALID_POINTS.join(', ')}`,
+  { code: 'INVALID_POINTS', params: { allowed: VALID_POINTS.join(', ') } },
+);
+```
+
+El frontend mapea `code` a una clave `errors.<CODE>` en su archivo de
+locales e interpola los `params`. El fallback es el `message` original.
 
 #### Validadores por recurso (`utils/`)
 
@@ -632,8 +661,10 @@ errores.
 Lista plana de los proyectos del usuario, usando `ListContainerComponent`.
 
 #### MyStoriesView (vista dual)
-- `admin_projects` (PM): filtros por status (todos/todo/running/done).
-- `member`: filtro implícito `assignedTo === userId`.
+- `admin_projects` (PM): pega una sola vez a `/stories` al montar y filtra por
+  status (todos / todo / running / done) **en memoria con `useMemo`**. Cambiar
+  de pestaña no dispara un refetch.
+- `member`: filtro server-side por `assignedTo === userId`.
 
 #### ProjectView
 - Cabecera con nombre/descripción del proyecto + acciones (edit si
@@ -669,8 +700,9 @@ de proyectos a los que pertenece con el rol que tiene en cada uno.
 #### AdminUsersPanel (renderizado dentro de HomeView)
 - **Tab Usuarios**: crear, editar y desactivar usuarios; tabla con username,
   email, rol y estado.
-- **Tab Proyectos**: seleccionar proyecto, ver miembros, agregar/quitar y
-  cambiar rol dentro del proyecto.
+- **Tab Proyectos**: **crear proyectos** asignando un `admin_projects` desde un
+  dropdown de usuarios activos; luego seleccionar un proyecto existente para
+  ver miembros, agregar/quitar y cambiar su rol dentro del proyecto.
 
 ### 4.5 Componentes reutilizables
 
@@ -716,7 +748,10 @@ en `localStorage` para asumir sesión activa.
 - En **401**: intenta `POST /auth/refresh`. Si tiene éxito, reintenta la
   request original (con `isRetry=true` para evitar bucles). Si falla,
   remueve `user` de `localStorage` y redirige a `/`.
-- Parsea JSON y propaga `Error(data.message)` ante respuestas no-ok.
+- Parsea JSON y propaga un `Error(data.message)` ante respuestas no-ok. Si la
+  respuesta incluye `code` y/o `params`, los adjunta al `Error` para que el
+  caller pueda traducirlos con `src/api/translateError.js` (helper que busca
+  `errors.<code>` en i18n e interpola `params`, con fallback al `message`).
 
 #### Convención de servicios
 
@@ -736,13 +771,14 @@ en `localStorage` para asumir sesión activa.
 - **Mutaciones** son funciones `async` puras que devuelven `data` y lanzan
   excepciones para que la vista las capture con `try/catch`.
 
-Servicios implementados (resumen): `useAllProjects`, `useAllStories`,
-`useAllTasks`, `useEpicById`, `useEpicsByProjectId`, `useMe`,
-`useProjectById`, `useTaskById`, `useTasksByUSId`, `useUSById`,
-`useUSByEpicId`, `getUsers`, `login`, `logout`, `changePassword`,
-`createUser`, `updateUser`, `deactivateUser`, `createEpic`, `updateEpic`,
-`deleteEpic`, `createStory`, `updateStory`, `deleteStory`, `createTask`,
-`updateTask`, `deleteTask`, `updateProject`, `updateProjectMembers`.
+Servicios implementados (resumen): `useAllProjects` (expone `refetch` para
+recargar el listado tras crear), `useAllStories`, `useAllTasks`,
+`useEpicById`, `useEpicsByProjectId`, `useMe`, `useProjectById`,
+`useTaskById`, `useTasksByUSId`, `useUSById`, `useUSByEpicId`, `getUsers`,
+`login`, `logout`, `changePassword`, `createUser`, `updateUser`,
+`deactivateUser`, `createProject`, `createEpic`, `updateEpic`, `deleteEpic`,
+`createStory`, `updateStory`, `deleteStory`, `createTask`, `updateTask`,
+`deleteTask`, `updateProject`, `updateProjectMembers`.
 
 ### 4.8 Estilos, tema e internacionalización
 
@@ -765,6 +801,14 @@ en `src/styles/theme.scss` como variables CSS (`--color-bg`, `--color-brand`,
 agrupan por dominio (`nav.*`, `crud.*`, `admin.*`, etc.) en
 `src/locales/{es,en}.json`. La regla en el proyecto: **no hardcodear strings
 visibles**; siempre `t("clave")`.
+
+**Errores del backend traducidos en el cliente**. El namespace `errors.*` mapea
+los `code` que emite el backend a mensajes localizados con interpolación de
+`params`. Por ejemplo, `errors.INVALID_POINTS` = "Los puntos deben ser uno de:
+{{allowed}}". El helper `translateError(t, err)` lo encapsula y cae al
+`message` original si no encuentra clave. Agregar un nuevo error traducible
+implica: 1) lanzarlo en el backend con `{ code, params }`; 2) sumar la clave
+`errors.<CODE>` en `locales/es.json` y `locales/en.json`.
 
 ---
 
@@ -929,5 +973,6 @@ Si falta alguna variable obligatoria, el proceso aborta al arrancar.
 
 - Sin tests de integración HTTP en el backend.
 - Sin tests para `AdminUsersPanel` ni `ProtectedRoute` en el frontend.
-- Internacionalización del backend pendiente (mensajes de error en español
-  fijo).
+- La i18n de errores del backend se resuelve en el cliente vía `code`/`params`;
+  por ahora solo está cubierto `INVALID_POINTS`. Sumar nuevos códigos a medida
+  que se identifiquen mensajes que el usuario final llega a ver.

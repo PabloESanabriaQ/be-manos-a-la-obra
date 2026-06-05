@@ -423,7 +423,8 @@
         </table>
         <p class="small" style="margin-top:0.8em;">
           Respuestas estandarizadas: <code>{ data, pagination }</code> en listados ·
-          <code>{ error, name, message }</code> en errores. Paginación default
+          <code>{ error, name, message [, code, params] }</code> en errores
+          (los dos últimos para que el frontend traduzca). Paginación default
           <code>page=1, limit=20</code>.
         </p>
         <div class="footer">07 · API</div>
@@ -523,17 +524,23 @@ req.userRole = user.role;</code></pre>
   status >= 500
     ? logger.error({ err }, err.message)
     : logger.warn ({ err }, err.message);
-  res.status(status).json({
+  const body = {
     error: true,
     name: err.name,
     message: err.message,
-  });
+  };
+  if (err.code)   body.code = err.code;
+  if (err.params) body.params = err.params;
+  res.status(status).json(body);
 };</code></pre>
           </div>
         </div>
         <p class="small"><strong>Validadores por recurso</strong> en <code>utils/</code>:
           <code>validateCreateStory</code>, <code>validateUpdateTask</code>, etc.
           Sin Joi/Zod, manteniendo dependencias livianas.</p>
+        <p class="small"><strong>i18n del cliente:</strong> los errores pueden
+          llevar <code>{ code, params }</code> (por ej. <code>INVALID_POINTS</code>)
+          y el frontend los traduce con <code>errors.&lt;code&gt;</code> según el idioma.</p>
         <div class="footer">10 · Errores</div>
       </section>
 
@@ -808,7 +815,49 @@ export default function useAllProjects() {
         <div class="footer">19 · Calidad</div>
       </section>
 
-      <!-- ===== SLIDE 20a: DECISIONES — SEGURIDAD Y DOMINIO ===== -->
+      <!-- ===== SLIDE 20: HUSKY + LINT-STAGED ===== -->
+      <section>
+        <h2>Husky + lint-staged en el frontend</h2>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.95em;">Qué corre en cada commit</h3>
+            <pre><code class="language-json">"lint-staged": {
+  "*.{js,jsx}": [
+    "eslint --fix",
+    "prettier --write"
+  ],
+  "*.{css,scss,json,md}": [
+    "prettier --write"
+  ]
+}</code></pre>
+            <ul style="font-size:0.72em;">
+              <li>Solo corre sobre <strong>archivos staged</strong>, no toda la base.</li>
+              <li>Re-stagea los autofixes y deja el commit limpio.</li>
+              <li>Si algo no se puede arreglar, el commit aborta.</li>
+            </ul>
+          </div>
+          <div>
+            <h3 style="font-size:0.95em;">Para qué sirve</h3>
+            <ul style="font-size:0.72em; line-height: 1.55;">
+              <li><strong>Lint automático</strong> — vars sin uso, semis,
+                comillas, reglas de hooks: corregidos sin pensar.</li>
+              <li><strong>Formato consistente</strong> — Prettier neutraliza
+                diferencias de editor entre quienes contribuyen.</li>
+              <li><strong>Falla rápido</strong> — el ruido se ataja antes del
+                PR, no en code review.</li>
+              <li><strong>Sin penalidad</strong> — solo toca lo modificado,
+                típicamente menos de 2 segundos.</li>
+            </ul>
+            <p class="small" style="margin-top:0.6em;">El backend no tiene
+              hooks instalados: <code>.husky/</code> no existe y
+              <code>package.json</code> no declara <code>"prepare"</code>.
+              Linteo confiado al editor + revisión manual.</p>
+          </div>
+        </div>
+        <div class="footer">20 · Husky</div>
+      </section>
+
+      <!-- ===== SLIDE 21a: DECISIONES — SEGURIDAD Y DOMINIO ===== -->
       <section>
         <h2>Decisiones de diseño <span style="font-size:0.55em; color: var(--muted);">— seguridad y dominio</span></h2>
         <ul style="font-size: 0.72em; line-height: 1.5;">
@@ -825,10 +874,10 @@ export default function useAllProjects() {
             (no en hooks de Mongoose) — control explícito sobre el orden y
             testeable sin levantar la base de datos.</li>
         </ul>
-        <div class="footer">20 · Decisiones I</div>
+        <div class="footer">21 · Decisiones I</div>
       </section>
 
-      <!-- ===== SLIDE 20b: DECISIONES — DX Y PRODUCTO ===== -->
+      <!-- ===== SLIDE 22: DECISIONES — DX Y PRODUCTO ===== -->
       <section>
         <h2>Decisiones de diseño <span style="font-size:0.55em; color: var(--muted);">— DX y producto</span></h2>
         <ul style="font-size: 0.72em; line-height: 1.5;">
@@ -846,10 +895,55 @@ export default function useAllProjects() {
             <code>t("clave")</code>; el tema usa CSS custom properties
             intercambiables vía <code>data-theme</code>.</li>
         </ul>
-        <div class="footer">21 · Decisiones II</div>
+        <div class="footer">22 · Decisiones II</div>
       </section>
 
-      <!-- ===== SLIDE 21: CIERRE ===== -->
+      <!-- ===== SLIDE 23: IA + CRITERIO — MyStories ===== -->
+      <section>
+        <h2>Trabajando con IA: leer el código que genera</h2>
+        <p class="small">En <code>MyStoriesView</code>, cada cambio de pestaña
+          <em>(Todas / Por hacer / En curso / Hecho)</em> disparaba un GET a
+          <code>/stories</code>. La IA había sumado <code>status</code> como
+          dependencia del <code>useEffect</code>: técnicamente funciona, pero
+          es ineficiente.</p>
+        <div class="two-col">
+          <div>
+            <h3 style="font-size:0.85em;">Antes — refetch en cada click</h3>
+            <pre><code class="language-jsx">function PMStoriesView() {
+  const [status, setStatus] = useState(null);
+  const { data, loading, error } =
+    useAllStories({ status });   // ← refetch
+
+  return &lt;List data={data} /&gt;;
+}</code></pre>
+          </div>
+          <div>
+            <h3 style="font-size:0.85em;">Después — filtro en memoria</h3>
+            <pre><code class="language-jsx">function PMStoriesView() {
+  const [status, setStatus] = useState(null);
+  const { data, loading, error } = useAllStories();
+
+  const filtered = useMemo(
+    () => status
+      ? data?.filter(s =&gt; s.status === status)
+      : data,
+    [data, status],
+  );
+  return &lt;List data={filtered} /&gt;;
+}</code></pre>
+          </div>
+        </div>
+        <p class="small" style="margin-top:0.5em;">
+          <strong>Moraleja:</strong> la IA acelera, pero hay que <em>revisar lo
+          que escribe</em> y conocer el stack — <code>useMemo</code>,
+          dependencias de <code>useEffect</code>, costo de I/O — para distinguir
+          <em>"funciona"</em> de <em>"funciona eficientemente"</em>.
+          Una request por click ≠ una request por carga + filtrado local.
+        </p>
+        <div class="footer">23 · IA + criterio</div>
+      </section>
+
+      <!-- ===== SLIDE FINAL: CIERRE ===== -->
       <section class="cover">
         <h1>¡Gracias!</h1>
         <p class="subtitle">Manos a la Obra · Repaso integral del proyecto</p>
