@@ -138,6 +138,22 @@ describe('StoriesService', () => {
       }
     });
 
+    it('coerciona points cuando llega como string numérico', async () => {
+      const input = { name: 'Story', epic: 'epic-id', points: '5' };
+      const mockInstance = { save: vi.fn().mockResolvedValue({ _id: 'nuevo-id' }) };
+      Story.mockImplementation(function() { return mockInstance; });
+
+      await create(input);
+
+      expect(input.points).toBe(5);
+      expect(Story).toHaveBeenCalledWith(expect.objectContaining({ points: 5 }));
+    });
+
+    it('lanza ValidationError si points es un string no válido', async () => {
+      await expect(create({ name: 'Story', epic: 'epic-id', points: '4' })).rejects.toThrow(ValidationError);
+      await expect(create({ name: 'Story', epic: 'epic-id', points: 'abc' })).rejects.toThrow(ValidationError);
+    });
+
     it('lanza ValidationError si un usuario asignado no es miembro del proyecto', async () => {
       Epic.findById.mockResolvedValue({ _id: 'epic-id', project: 'project-id' });
       Project.findById.mockResolvedValue({
