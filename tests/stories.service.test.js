@@ -163,6 +163,14 @@ describe('StoriesService', () => {
       await expect(create({ name: 'Story', epic: 'epic-id', points: 'abc' })).rejects.toThrow(ValidationError);
     });
 
+    it('el error de points invalido incluye code INVALID_POINTS y params.allowed', async () => {
+      await expect(create({ name: 'Story', epic: 'epic-id', points: 4 })).rejects.toMatchObject({
+        name: 'ValidationError',
+        code: 'INVALID_POINTS',
+        params: { allowed: '0, 1, 2, 3, 5, 8, 13, 21' },
+      });
+    });
+
     it('lanza ValidationError si un usuario asignado no es miembro del proyecto', async () => {
       Epic.findById.mockResolvedValue({ _id: 'epic-id', project: 'project-id' });
       Project.findById.mockResolvedValue({

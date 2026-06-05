@@ -10,7 +10,10 @@ const validatePoints = (body) => {
   }
   const n = Number(body.points);
   if (!VALID_POINTS.includes(n)) {
-    throw new ValidationError(`Points must be one of: ${VALID_POINTS.join(', ')}`);
+    throw new ValidationError(
+      `Points must be one of: ${VALID_POINTS.join(', ')}`,
+      { code: 'INVALID_POINTS', params: { allowed: VALID_POINTS.join(', ') } },
+    );
   }
   body.points = n;
 };

@@ -9,11 +9,14 @@ const errorHandler = (err, req, res, _next) => {
     logger.warn({ err, req: { method: req.method, url: req.url } }, err.message);
   }
 
-  res.status(status).json({
+  const body = {
     error: true,
     name: err.name,
     message: err.message || 'Internal Server Error',
-  });
+  };
+  if (err.code) body.code = err.code;
+  if (err.params) body.params = err.params;
+  res.status(status).json(body);
 };
 
 export default errorHandler;
