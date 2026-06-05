@@ -2,7 +2,9 @@ import Project from '../models/projects.model.js';
 import Epic from '../models/epics.model.js';
 import Story from '../models/stories.model.js';
 import Task from '../models/tasks.model.js';
+import User from '../models/users.model.js';
 import NotFoundError from '../errors/NotFoundError.js';
+import ValidationError from '../errors/ValidationError.js';
 import { validateCreateProject, validateUpdateProject } from '../utils/validateProjects.js';
 
 const getAll = async (page = 1, limit = 20, userId, userRole) => {
@@ -30,9 +32,18 @@ const getEpicsByProject = async (id) => {
   return Epic.find({ project: id, deletedAt: null });
 };
 
-const create = (body) => {
+const create = async (body) => {
   validateCreateProject(body);
-  return new Project(body).save();
+  const admin = await User.findById(body.adminId);
+  if (!admin || !admin.active) {
+    throw new ValidationError('Admin user not found or inactive');
+  }
+  return new Project({
+    name: body.name,
+    description: body.description,
+    icon: body.icon,
+    members: [{ user: admin._id, role: 'admin_projects' }],
+  }).save();
 };
 
 const update = async (id, body) => {

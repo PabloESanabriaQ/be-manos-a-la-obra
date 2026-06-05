@@ -30,8 +30,15 @@ vi.mock('../models/tasks.model.js', () => {
   return { default: MockTask };
 });
 
+vi.mock('../models/users.model.js', () => {
+  const MockUser = vi.fn();
+  MockUser.findById = vi.fn();
+  return { default: MockUser };
+});
+
 import Project from '../models/projects.model.js';
 import Epic from '../models/epics.model.js';
+import User from '../models/users.model.js';
 import { getAll, getById, getEpicsByProject, create, update, remove } from '../services/projects.service.js';
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
@@ -112,20 +119,59 @@ describe('ProjectsService', () => {
   });
 
   describe('create', () => {
-    it('guarda y devuelve el nuevo proyecto', async () => {
-      const input = { name: 'Nuevo proyecto' };
-      const saved = { _id: 'nuevo-id', ...input };
+    it('guarda el proyecto inicializando members con el admin asignado', async () => {
+      User.findById.mockResolvedValue({ _id: 'admin-id', active: true });
+      const saved = { _id: 'nuevo-id', name: 'Nuevo proyecto' };
       const mockInstance = { save: vi.fn().mockResolvedValue(saved) };
       Project.mockImplementation(function() { return mockInstance; });
 
-      const result = await create(input);
+      const result = await create({ name: 'Nuevo proyecto', adminId: 'admin-id' });
 
+      expect(User.findById).toHaveBeenCalledWith('admin-id');
+      expect(Project).toHaveBeenCalledWith(expect.objectContaining({
+        name: 'Nuevo proyecto',
+        members: [{ user: 'admin-id', role: 'admin_projects' }],
+      }));
       expect(mockInstance.save).toHaveBeenCalledOnce();
       expect(result).toEqual(saved);
     });
 
-    it('lanza ValidationError si falta name', () => {
-      expect(() => create({})).toThrow(ValidationError);
+    it('ignora members del body y solo usa el admin asignado', async () => {
+      User.findById.mockResolvedValue({ _id: 'admin-id', active: true });
+      const mockInstance = { save: vi.fn().mockResolvedValue({ _id: 'x' }) };
+      Project.mockImplementation(function() { return mockInstance; });
+
+      await create({
+        name: 'Proyecto',
+        adminId: 'admin-id',
+        members: [{ user: 'otro', role: 'admin_projects' }],
+      });
+
+      expect(Project).toHaveBeenCalledWith(expect.objectContaining({
+        members: [{ user: 'admin-id', role: 'admin_projects' }],
+      }));
+    });
+
+    it('lanza ValidationError si falta name', async () => {
+      await expect(create({ adminId: 'admin-id' })).rejects.toThrow(ValidationError);
+    });
+
+    it('lanza ValidationError si falta adminId', async () => {
+      await expect(create({ name: 'Proyecto' })).rejects.toThrow(ValidationError);
+    });
+
+    it('lanza ValidationError si el admin asignado no existe', async () => {
+      User.findById.mockResolvedValue(null);
+
+      await expect(create({ name: 'Proyecto', adminId: 'no-existe' }))
+        .rejects.toThrow(ValidationError);
+    });
+
+    it('lanza ValidationError si el admin asignado está inactivo', async () => {
+      User.findById.mockResolvedValue({ _id: 'admin-id', active: false });
+
+      await expect(create({ name: 'Proyecto', adminId: 'admin-id' }))
+        .rejects.toThrow(ValidationError);
     });
   });
 

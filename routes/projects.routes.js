@@ -37,13 +37,14 @@ const router = express.Router();
  *                   $ref: '#/components/schemas/Pagination'
  *   post:
  *     summary: Crear proyecto
+ *     description: Solo accesible para admin_users. Debe indicarse el adminId del usuario que será admin_projects del nuevo proyecto.
  *     tags: [Projects]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/ProjectInput'
+ *             $ref: '#/components/schemas/ProjectCreateInput'
  *     responses:
  *       201:
  *         description: Proyecto creado
@@ -55,7 +56,7 @@ const router = express.Router();
  *                 data:
  *                   $ref: '#/components/schemas/Project'
  *       400:
- *         description: Datos inválidos
+ *         description: Datos inválidos (faltan name/adminId, o el admin no existe / está inactivo)
  *         content:
  *           application/json:
  *             schema:

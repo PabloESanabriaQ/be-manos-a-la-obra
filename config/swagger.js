@@ -94,6 +94,19 @@ const options = {
             },
           },
         },
+        ProjectCreateInput: {
+          type: 'object',
+          required: ['name', 'adminId'],
+          properties: {
+            name: { type: 'string', example: 'Proyecto Alpha' },
+            description: { type: 'string', example: 'Descripción del proyecto' },
+            adminId: {
+              type: 'string',
+              example: '64a1f2c3d4e5f6a7b8c9d0e2',
+              description: 'ID del usuario que será admin_projects del nuevo proyecto. Debe existir y estar activo.',
+            },
+          },
+        },
         Epic: {
           type: 'object',
           properties: {
