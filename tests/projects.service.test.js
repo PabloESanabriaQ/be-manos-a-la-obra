@@ -36,6 +36,15 @@ import { getAll, getById, getEpicsByProject, create, update, remove } from '../s
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 
+// Imita el Query encadenable de Mongoose: .populate() devuelve el mismo objeto
+// y .then() lo hace thenable para resolver con el valor mockeado.
+const queryMock = (value) => {
+  const q = {};
+  q.populate = vi.fn(() => q);
+  q.then = (onFulfilled, onRejected) => Promise.resolve(value).then(onFulfilled, onRejected);
+  return q;
+};
+
 describe('ProjectsService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,7 +70,7 @@ describe('ProjectsService', () => {
   describe('getById', () => {
     it('devuelve el proyecto si existe', async () => {
       const fakeProject = { _id: '1', name: 'Proyecto A' };
-      Project.findById.mockResolvedValue(fakeProject);
+      Project.findById.mockReturnValue(queryMock(fakeProject));
 
       const result = await getById('1');
 
@@ -70,13 +79,13 @@ describe('ProjectsService', () => {
     });
 
     it('lanza NotFoundError si no existe', async () => {
-      Project.findById.mockResolvedValue(null);
+      Project.findById.mockReturnValue(queryMock(null));
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
     });
 
     it('lanza NotFoundError si está eliminado', async () => {
-      Project.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+      Project.findById.mockReturnValue(queryMock({ _id: '1', deletedAt: new Date() }));
 
       await expect(getById('1')).rejects.toThrow(NotFoundError);
     });

@@ -36,6 +36,15 @@ import { getAll, getById, getTasksByStory, create, update } from '../services/st
 import NotFoundError from '../errors/NotFoundError.js';
 import ValidationError from '../errors/ValidationError.js';
 
+// Imita el Query encadenable de Mongoose: .populate() devuelve el mismo objeto
+// y .then() lo hace thenable para resolver con el valor mockeado.
+const queryMock = (value) => {
+  const q = {};
+  q.populate = vi.fn(() => q);
+  q.then = (onFulfilled, onRejected) => Promise.resolve(value).then(onFulfilled, onRejected);
+  return q;
+};
+
 describe('StoriesService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -61,7 +70,7 @@ describe('StoriesService', () => {
   describe('getById', () => {
     it('devuelve la story si existe', async () => {
       const fakeStory = { _id: '1', name: 'Story A' };
-      Story.findById.mockResolvedValue(fakeStory);
+      Story.findById.mockReturnValue(queryMock(fakeStory));
 
       const result = await getById('1');
 
@@ -70,13 +79,13 @@ describe('StoriesService', () => {
     });
 
     it('lanza NotFoundError si no existe', async () => {
-      Story.findById.mockResolvedValue(null);
+      Story.findById.mockReturnValue(queryMock(null));
 
       await expect(getById('inexistente')).rejects.toThrow(NotFoundError);
     });
 
     it('lanza NotFoundError si está eliminada', async () => {
-      Story.findById.mockResolvedValue({ _id: '1', deletedAt: new Date() });
+      Story.findById.mockReturnValue(queryMock({ _id: '1', deletedAt: new Date() }));
 
       await expect(getById('1')).rejects.toThrow(NotFoundError);
     });
@@ -190,7 +199,7 @@ describe('StoriesService', () => {
       const existing = { _id: '1', name: 'Antes', epic: { toString: () => 'epic-1' } };
       const updated = { _id: '1', name: 'Después', epic: 'epic-1' };
       Story.findById.mockResolvedValue(existing);
-      Story.findByIdAndUpdate.mockResolvedValue(updated);
+      Story.findByIdAndUpdate.mockReturnValue(queryMock(updated));
 
       const result = await update('1', { name: 'Después', epic: 'epic-1' });
 
